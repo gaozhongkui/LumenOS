@@ -1,21 +1,13 @@
 import SwiftUI
 
-// MARK: - Brand Color Palette
-extension Color {
-    static let l_background = Color(red: 0.04, green: 0.05, blue: 0.08)
-    static let l_surface = Color(red: 0.11, green: 0.12, blue: 0.16)
-    static let l_gold = Color(red: 1.00, green: 0.84, blue: 0.29) // 品牌金：来源于图标
-    static let l_accent = Color(red: 1.00, green: 0.58, blue: 0.00) // 品牌橙：辅助渐变
-}
-
 struct ContentView: View {
+    @StateObject private var themeManager = ThemeManager.shared
     @State private var selectedTab = 0
 
     init() {
-        // 自定义 TabBar 外观
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(Color.l_background)
+        appearance.backgroundColor = UIColor(red: 0.04, green: 0.05, blue: 0.08, alpha: 1.0)
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
         UITabBar.appearance().unselectedItemTintColor = .gray
@@ -41,27 +33,52 @@ struct ContentView: View {
                 }
                 .tag(2)
         }
-        .accentColor(.l_gold)
+        .accentColor(themeManager.selectedTheme.primary)
+        .environmentObject(themeManager)
         .preferredColorScheme(.dark)
     }
 }
 
+// MARK: - Document View
+struct DocumentView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+    let title: String
+    let content: String
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 15) {
+                Text(content)
+                    .font(.body)
+                    .lineSpacing(6)
+                    .foregroundColor(.white.opacity(0.9))
+            }
+            .padding(20)
+        }
+        .background(themeManager.selectedTheme.background.ignoresSafeArea())
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
 struct ProfileView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var subManager = SubscriptionManager.shared
     @State private var showPaywall = false
 
     var body: some View {
         NavigationView {
             ZStack {
-                Color.l_background.ignoresSafeArea()
+                themeManager.selectedTheme.background.ignoresSafeArea()
 
                 List {
+                    // User Info
                     Section {
                         HStack(spacing: 15) {
                             Image(systemName: "person.circle.fill")
                                 .resizable()
                                 .frame(width: 60, height: 60)
-                                .foregroundColor(.l_gold.opacity(0.8))
+                                .foregroundColor(themeManager.selectedTheme.primary.opacity(0.8))
 
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
@@ -73,7 +90,7 @@ struct ProfileView: View {
                                             .font(.system(size: 10, weight: .bold))
                                             .padding(.horizontal, 8)
                                             .padding(.vertical, 2)
-                                            .background(LinearGradient(colors: [.l_gold, .l_accent], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                            .background(LinearGradient(colors: [themeManager.selectedTheme.primary, themeManager.selectedTheme.secondary], startPoint: .topLeading, endPoint: .bottomTrailing))
                                             .foregroundColor(.black)
                                             .cornerRadius(4)
                                     }
@@ -85,12 +102,56 @@ struct ProfileView: View {
                         }
                         .padding(.vertical, 8)
                     }
-                    .listRowBackground(Color.l_surface)
+                    .listRowBackground(themeManager.selectedTheme.surface)
 
+                    // MARK: - Skin Selection Section
+                    Section(header: Text("APP SKIN").foregroundColor(.gray)) {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 15) {
+                                ForEach(AppTheme.allCases) { theme in
+                                    VStack {
+                                        ZStack {
+                                            Circle()
+                                                .fill(theme.primary)
+                                                .frame(width: 45, height: 45)
+
+                                            if themeManager.selectedTheme == theme {
+                                                Image(systemName: "checkmark")
+                                                    .foregroundColor(.black)
+                                                    .font(.system(size: 20, weight: .bold))
+                                            } else if theme.isPro && !subManager.isSubscribed {
+                                                Image(systemName: "lock.fill")
+                                                    .foregroundColor(.black.opacity(0.5))
+                                                    .font(.system(size: 16))
+                                            }
+                                        }
+                                        .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
+                                        .onTapGesture {
+                                            if theme.isPro && !subManager.isSubscribed {
+                                                showPaywall = true
+                                            } else {
+                                                withAnimation {
+                                                    themeManager.selectedTheme = theme
+                                                }
+                                            }
+                                        }
+
+                                        Text(theme.rawValue)
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 10)
+                        }
+                    }
+                    .listRowBackground(themeManager.selectedTheme.surface)
+
+                    // Subscription
                     Section(header: Text(NSLocalizedString("section_account_status", comment: "")).foregroundColor(.gray)) {
                         HStack {
                             Label(NSLocalizedString("pro_status_title", comment: ""), systemImage: "crown.fill")
-                                .foregroundColor(subManager.isSubscribed ? .l_gold : .gray)
+                                .foregroundColor(subManager.isSubscribed ? themeManager.selectedTheme.primary : .gray)
                             Spacer()
                             Text(subManager.isSubscribed ? NSLocalizedString("status_activated", comment: "") : NSLocalizedString("status_not_unlocked", comment: ""))
                                 .foregroundColor(.gray)
@@ -99,40 +160,39 @@ struct ProfileView: View {
                         if !subManager.isSubscribed {
                             Button(action: { showPaywall = true }) {
                                 Text(NSLocalizedString("btn_unlock_pro", comment: ""))
-                                    .foregroundColor(.l_gold)
+                                    .foregroundColor(themeManager.selectedTheme.primary)
                                     .fontWeight(.bold)
                             }
-                        } else {
-                            Text(NSLocalizedString("thanks_support", comment: ""))
-                                .font(.footnote)
-                                .foregroundColor(.gray)
                         }
                     }
-                    .listRowBackground(Color.l_surface)
+                    .listRowBackground(themeManager.selectedTheme.surface)
 
+                    // Legal & Info
                     Section(header: Text(NSLocalizedString("section_legal", comment: "")).foregroundColor(.gray)) {
-                        NavigationLink(destination: Text(NSLocalizedString("privacy_policy_content", comment: ""))) {
+                        NavigationLink(destination: DocumentView(title: "Product Info", content: productIntroText)) {
+                            Label("Product Info", systemImage: "info.circle")
+                        }
+
+                        NavigationLink(destination: DocumentView(title: NSLocalizedString("privacy_policy", comment: ""), content: privacyPolicyText)) {
                             Label(NSLocalizedString("privacy_policy", comment: ""), systemImage: "shield.lefthalf.filled")
                         }
 
-                        NavigationLink(destination: Text(NSLocalizedString("terms_of_service_content", comment: ""))) {
+                        NavigationLink(destination: DocumentView(title: NSLocalizedString("terms_of_service", comment: ""), content: termsOfServiceText)) {
                             Label(NSLocalizedString("terms_of_service", comment: ""), systemImage: "doc.text")
                         }
                     }
-                    .listRowBackground(Color.l_surface)
+                    .listRowBackground(themeManager.selectedTheme.surface)
 
                     Section {
                         Button(action: {
-                            Task {
-                                await subManager.updatePurchaseStatus()
-                            }
+                            Task { await subManager.updatePurchaseStatus() }
                         }) {
                             Text(NSLocalizedString("btn_restore_purchase", comment: ""))
                                 .frame(maxWidth: .infinity)
                         }
                         .foregroundColor(.gray)
                     }
-                    .listRowBackground(Color.l_surface)
+                    .listRowBackground(themeManager.selectedTheme.surface)
                 }
                 .scrollContentBackground(.hidden)
             }
@@ -142,8 +202,34 @@ struct ProfileView: View {
             }
         }
     }
+
+    private var productIntroText: String = """
+    LumenOS is an all-in-one light and shadow tool.
+
+    - Intelligent Flashlight: Precision brightness control with SOS and Party modes.
+    - Creative Barrage: Custom LED effects with RGB glow and dynamic themes.
+    - Sync Feature: Synchronize your flashlight with your barrage rhythm.
+
+    Unlock PRO to enjoy unlimited features and exclusive themes.
+    """
+
+    private var privacyPolicyText: String = """
+    Your privacy is our priority.
+
+    1. No Collection: We do not collect any personal data or location information.
+    2. Permissions: Camera/Flashlight access is used only for lighting features.
+    3. Security: All processing is done locally on your device.
+    """
+
+    private var termsOfServiceText: String = """
+    By using LumenOS, you agree to these terms:
+
+    - License: Personal, non-commercial use only.
+    - Purchase: PRO features are available via a one-time payment.
+    - Responsibility: We are not liable for misuse of the flashlight features.
+    """
 }
 
 #Preview {
-    ContentView()
+    ContentView().environmentObject(ThemeManager.shared)
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct BarrageView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var manager = FlashlightManager.shared
     @StateObject private var subManager = SubscriptionManager.shared
 
@@ -18,7 +19,10 @@ struct BarrageView: View {
     @State private var showFullScreen: Bool = false
     @State private var showPaywall = false
 
-    let colors: [Color] = [.white, .l_gold, .l_accent, .red, .pink, .purple, .blue, .green]
+    var colors: [Color] {
+        [.white, themeManager.selectedTheme.primary, themeManager.selectedTheme.secondary, .red, .pink, .purple, .blue, .green]
+    }
+
     let presets = [
         NSLocalizedString("preset_pickup", comment: ""),
         NSLocalizedString("preset_cheer", comment: ""),
@@ -31,7 +35,7 @@ struct BarrageView: View {
 
     var body: some View {
         ZStack {
-            Color.l_background.ignoresSafeArea()
+            themeManager.selectedTheme.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // 1. Live Preview
@@ -57,7 +61,7 @@ struct BarrageView: View {
                             .foregroundColor(.black)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color.l_gold)
+                            .background(themeManager.selectedTheme.primary)
                             .cornerRadius(10)
                         }
                     }
@@ -99,7 +103,7 @@ struct BarrageView: View {
                                 ZStack(alignment: .trailing) {
                                     TextField("", text: $text, prompt: Text(NSLocalizedString("placeholder_input_barrage", comment: "")).foregroundColor(.gray))
                                         .padding(14)
-                                        .background(Color.l_surface)
+                                        .background(themeManager.selectedTheme.surface)
                                         .cornerRadius(12)
                                         .foregroundColor(.white)
                                         .focused($isInputFocused)
@@ -116,7 +120,7 @@ struct BarrageView: View {
                                 Button(action: { isInputFocused = false }) {
                                     Text(NSLocalizedString("btn_done", comment: ""))
                                         .fontWeight(.bold)
-                                        .foregroundColor(.l_gold)
+                                        .foregroundColor(themeManager.selectedTheme.primary)
                                 }
                             }
 
@@ -128,8 +132,8 @@ struct BarrageView: View {
                                                 .font(.system(size: 13))
                                                 .padding(.horizontal, 15)
                                                 .padding(.vertical, 8)
-                                                .background(Color.l_gold.opacity(0.15))
-                                                .foregroundColor(.l_gold)
+                                                .background(themeManager.selectedTheme.primary.opacity(0.15))
+                                                .foregroundColor(themeManager.selectedTheme.primary)
                                                 .cornerRadius(20)
                                         }
                                     }
@@ -143,7 +147,7 @@ struct BarrageView: View {
                                 HStack {
                                     Image(systemName: "tortoise.fill").foregroundColor(.gray)
                                     Slider(value: $speed, in: 1...10)
-                                        .accentColor(.l_gold)
+                                        .accentColor(themeManager.selectedTheme.primary)
                                     Image(systemName: "hare.fill").foregroundColor(.gray)
                                 }
                             }
@@ -190,7 +194,7 @@ struct BarrageView: View {
                                                 .font(.system(size: 13, weight: .medium))
                                                 .frame(maxWidth: .infinity)
                                                 .padding(.vertical, 12)
-                                                .background(bgType == type ? Color.l_gold : Color.l_surface)
+                                                .background(bgType == type ? themeManager.selectedTheme.primary : themeManager.selectedTheme.surface)
                                                 .foregroundColor(bgType == type ? .black : .gray)
                                                 .cornerRadius(12)
                                         }
@@ -199,13 +203,17 @@ struct BarrageView: View {
                             }
                         }
                         .padding(20)
-                        .background(Color.l_surface.opacity(0.5))
+                        .background(themeManager.selectedTheme.surface.opacity(0.5))
                         .cornerRadius(24)
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 50)
                 }
             }
+        }
+        .onChange(of: themeManager.selectedTheme) { newTheme in
+            // 如果用户没手动选过颜色，跟随主题更新默认色
+            selectedColor = newTheme.primary
         }
         .onTapGesture { isInputFocused = false }
         .fullScreenCover(isPresented: $showFullScreen) {
@@ -479,6 +487,7 @@ struct ControlSection<Content: View>: View {
 }
 
 struct ToggleCard: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let title: String
     @Binding var isOn: Bool
     let icon: String
@@ -493,7 +502,7 @@ struct ToggleCard: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)
-            .background(isOn ? Color.l_gold : Color.l_surface)
+            .background(isOn ? themeManager.selectedTheme.primary : themeManager.selectedTheme.surface)
             .foregroundColor(isOn ? .black : .white)
             .cornerRadius(16)
         }
@@ -501,5 +510,5 @@ struct ToggleCard: View {
 }
 
 #Preview {
-    BarrageView()
+    BarrageView().environmentObject(ThemeManager.shared)
 }

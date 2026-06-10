@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct FlashlightView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var manager = FlashlightManager.shared
     @StateObject private var subManager = SubscriptionManager.shared
 
@@ -13,7 +14,7 @@ struct FlashlightView: View {
     var body: some View {
         ZStack {
             // Background
-            Color.l_background
+            themeManager.selectedTheme.background
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -165,6 +166,12 @@ struct FlashlightView: View {
                 .padding(.bottom, 30)
             }
         }
+        .onChange(of: themeManager.selectedTheme) { newTheme in
+            // 当用户更换皮肤时，如果灯没开，自动将选色设为皮肤主色
+            if !isOn {
+                selectedColor = newTheme.primary
+            }
+        }
         .sheet(isPresented: $showPaywall) {
             SubscriptionPaywallView()
         }
@@ -187,7 +194,7 @@ struct FlashlightView: View {
     }
 }
 
-// MARK: - UI Components
+// MARK: - UI Components (Updated with Theme Support)
 
 struct PowerButtonUI: View {
     let isOn: Bool
@@ -235,6 +242,7 @@ struct KnobUI: View {
 }
 
 struct ModeItem: View {
+    @EnvironmentObject var themeManager: ThemeManager
     var text: String? = nil
     var icon: String? = nil
     var angle: Double
@@ -248,14 +256,12 @@ struct ModeItem: View {
 
     var body: some View {
         ZStack {
-            // Dot on dashed circle
             Circle()
-                .fill(isSelected ? Color.l_gold : Color.white.opacity(0.4))
+                .fill(isSelected ? themeManager.selectedTheme.primary : Color.white.opacity(0.4))
                 .frame(width: 4, height: 4)
                 .offset(y: -70)
                 .rotationEffect(.degrees(angle))
 
-            // Label
             Group {
                 if let text = text {
                     Text(text)
@@ -264,8 +270,8 @@ struct ModeItem: View {
                 }
             }
             .font(.system(size: 10, weight: isSelected ? .bold : .medium))
-            .foregroundColor(isSelected ? Color.l_gold : .white.opacity(0.6))
-            .rotationEffect(.degrees(-angle)) // Counter-rotate to stay upright
+            .foregroundColor(isSelected ? themeManager.selectedTheme.primary : .white.opacity(0.6))
+            .rotationEffect(.degrees(-angle))
             .offset(y: -85)
             .rotationEffect(.degrees(angle))
         }
@@ -279,27 +285,24 @@ struct ColorPickerUI: View {
             ColorPicker("", selection: $selectedColor).labelsHidden().scaleEffect(3).frame(width: 44, height: 44).mask(Circle()).zIndex(1)
             Circle().fill(AngularGradient(gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple, .red]), center: .center))
                 .frame(width: 44, height: 44)
-                .overlay(
-                    Circle()
-                        .stroke(Color.white, lineWidth: 2)
-                        .frame(width: 12, height: 12)
-                        .offset(x: 12) // Approximate position, would need color-to-angle logic for perfect accuracy
-                )
+                .overlay(Circle().stroke(Color.white, lineWidth: 2).frame(width: 12, height: 12).offset(x: 12))
                 .shadow(radius: 5).allowsHitTesting(false).zIndex(2)
         }
     }
 }
 
 struct CustomToggleStyle: ToggleStyle {
+    @EnvironmentObject var themeManager: ThemeManager
     func makeBody(configuration: Configuration) -> some View {
         Button(action: { configuration.isOn.toggle() }) {
-            RoundedRectangle(cornerRadius: 16).fill(Color.l_surface).frame(width: 50, height: 28)
-                .overlay(Circle().fill(LinearGradient(colors: [.l_gold, .l_accent], startPoint: .top, endPoint: .bottom)).padding(3).offset(x: configuration.isOn ? 11 : -11))
+            RoundedRectangle(cornerRadius: 16).fill(themeManager.selectedTheme.surface).frame(width: 50, height: 28)
+                .overlay(Circle().fill(LinearGradient(colors: [themeManager.selectedTheme.primary, themeManager.selectedTheme.secondary], startPoint: .top, endPoint: .bottom)).padding(3).offset(x: configuration.isOn ? 11 : -11))
         }
     }
 }
 
 struct SubscriptionPaywallView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.dismiss) var dismiss
     @StateObject private var subManager = SubscriptionManager.shared
     @State private var isPurchasing = false
@@ -327,19 +330,15 @@ struct SubscriptionPaywallView: View {
                         if isPurchasing { ProgressView().tint(.black).padding(.trailing, 5) }
                         Text(NSLocalizedString("btn_unlock_price", comment: ""))
                     }
-                    .fontWeight(.bold).frame(maxWidth: .infinity).padding().background(Color.l_gold).foregroundColor(.black).cornerRadius(12)
+                    .fontWeight(.bold).frame(maxWidth: .infinity).padding().background(themeManager.selectedTheme.primary).foregroundColor(.black).cornerRadius(12)
                 }
                 .disabled(isPurchasing)
-                Button(NSLocalizedString("btn_restore_purchase", comment: "")) { Task { await subManager.updatePurchaseStatus() } }.foregroundColor(.l_gold)
+                Button(NSLocalizedString("btn_restore_purchase", comment: "")) { Task { await subManager.updatePurchaseStatus() } }.foregroundColor(themeManager.selectedTheme.primary)
                 Button(NSLocalizedString("btn_not_now", comment: "")) { dismiss() }.foregroundColor(.gray)
             }
             .padding(.horizontal, 30)
             Spacer()
         }
-        .background(Color.l_background.ignoresSafeArea()).preferredColorScheme(.dark)
+        .background(themeManager.selectedTheme.background.ignoresSafeArea()).preferredColorScheme(.dark)
     }
-}
-
-#Preview {
-    FlashlightView()
 }
