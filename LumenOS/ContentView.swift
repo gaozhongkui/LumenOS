@@ -92,20 +92,13 @@ struct ProfileView: View {
                     }
                 }
 
-                Section(header: Text("常用功能")) {
-                    NavigationLink(destination: Text("设置页面")) {
-                        Label("应用设置", systemImage: "gear")
+                Section(header: Text("法律信息")) {
+                    NavigationLink(destination: Text("隐私协议内容...")) {
+                        Label("隐私协议", systemImage: "shield.lefthalf.filled")
                     }
 
-                    Button(action: {
-                        // 模拟反馈邮件或跳转
-                    }) {
-                        Label("意见反馈", systemImage: "envelope")
-                    }
-                    .foregroundColor(.white)
-
-                    NavigationLink(destination: Text("关于我们页面")) {
-                        Label("关于我们", systemImage: "info.circle")
+                    NavigationLink(destination: Text("服务条款内容...")) {
+                        Label("服务条款", systemImage: "doc.text")
                     }
                 }
 
