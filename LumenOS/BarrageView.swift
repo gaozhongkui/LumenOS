@@ -6,7 +6,6 @@ struct BarrageView: View {
     // Barrage Settings
     @State private var text: String = "LumenOS 极简弹幕"
     @State private var speed: Double = 5.0
-    @State private var fontSize: CGFloat = 60
     @State private var selectedColor: Color = .yellow
     @State private var isRGB: Bool = true
     @State private var isLED: Bool = false
@@ -15,6 +14,7 @@ struct BarrageView: View {
 
     // UI State
     @FocusState private var isInputFocused: Bool
+    @State private var showFullScreen: Bool = false
 
     let colors: [Color] = [.white, .yellow, .orange, .red, .pink, .purple, .blue, .green]
     let presets = ["捞人", "打 Call", "生日快乐", " (｡♥‿♥｡) ", " ✺◟(∗❛ัᴗ❛ั∗)◞✺ ", "前方高能", "全军出击"]
@@ -26,39 +26,55 @@ struct BarrageView: View {
             VStack(spacing: 0) {
                 // 1. 实时预览框 (Live Preview)
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("实时预览")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.gray)
-                        .padding(.horizontal)
+                    HStack {
+                        Text("实时预览")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.gray)
+                        Spacer()
+                        Button(action: { showFullScreen = true }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "play.fill")
+                                Text("全屏展示")
+                            }
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.yellow)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.yellow.opacity(0.15))
+                            .cornerRadius(10)
+                        }
+                    }
+                    .padding(.horizontal)
 
                     ZStack {
                         // 手机外框模型效果
                         RoundedRectangle(cornerRadius: 24)
-                            .stroke(LinearGradient(colors: [Color(white: 0.3), Color(white: 0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 6)
+                            .stroke(LinearGradient(colors: [Color(white: 0.3), Color(white: 0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 4)
                             .background(Color.black)
 
                         // 预览核心内容
-                        BarragePreviewContainer(
+                        BarrageEngineView(
                             text: text,
                             speed: speed,
                             color: selectedColor,
                             isRGB: isRGB,
                             isLED: isLED,
                             bgType: bgType,
-                            isTorchSync: isTorchSync
+                            isTorchSync: isTorchSync,
+                            isFullScreen: false
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 20))
 
-                        // 模拟听筒/摄像头区域
+                        // 灵动岛模拟
                         Capsule()
                             .fill(Color(white: 0.1))
-                            .frame(width: 60, height: 20)
-                            .offset(x: -80)
+                            .frame(width: 60, height: 18)
+                            .offset(y: -85)
                     }
                     .frame(height: 200)
                     .padding(.horizontal)
                 }
-                .padding(.top, 20)
+                .padding(.top, 10)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 25) {
@@ -117,13 +133,13 @@ struct BarrageView: View {
                                 }
                             }
 
-                            ControlSection(title: "文字颜色 & 特效", icon: "paintbrush.fill") {
+                            ControlSection(title: "颜色 & 特效", icon: "paintbrush.fill") {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 15) {
                                         Button(action: { isRGB = true }) {
                                             Circle()
                                                 .fill(AngularGradient(gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple, .red]), center: .center))
-                                                .frame(width: 34, height: 34)
+                                                .frame(width: 36, height: 34)
                                                 .overlay(
                                                     Circle().stroke(Color.white, lineWidth: isRGB ? 3 : 0)
                                                 )
@@ -158,10 +174,10 @@ struct BarrageView: View {
                                             Text(type.rawValue)
                                                 .font(.system(size: 13, weight: .medium))
                                                 .frame(maxWidth: .infinity)
-                                                .padding(.vertical, 10)
+                                                .padding(.vertical, 12)
                                                 .background(bgType == type ? Color.yellow : Color(white: 0.15))
                                                 .foregroundColor(bgType == type ? .black : .gray)
-                                                .cornerRadius(10)
+                                                .cornerRadius(12)
                                         }
                                     }
                                 }
@@ -172,17 +188,29 @@ struct BarrageView: View {
                         .cornerRadius(24)
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 100)
+                    .padding(.bottom, 50)
                 }
             }
         }
         .onTapGesture { isInputFocused = false }
+        .fullScreenCover(isPresented: $showFullScreen) {
+            FullScreenBarrageView(
+                text: text,
+                speed: speed,
+                color: selectedColor,
+                isRGB: isRGB,
+                isLED: isLED,
+                bgType: bgType,
+                isTorchSync: isTorchSync
+            )
+        }
     }
 }
 
-// MARK: - Barrage Engine
+// MARK: - Full Screen View
 
-struct BarragePreviewContainer: View {
+struct FullScreenBarrageView: View {
+    @Environment(\.dismiss) var dismiss
     let text: String
     let speed: Double
     let color: Color
@@ -193,20 +221,76 @@ struct BarragePreviewContainer: View {
 
     var body: some View {
         ZStack {
+            BarrageEngineView(
+                text: text,
+                speed: speed,
+                color: color,
+                isRGB: isRGB,
+                isLED: isLED,
+                bgType: bgType,
+                isTorchSync: isTorchSync,
+                isFullScreen: true
+            )
+            .ignoresSafeArea()
+
+            VStack {
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.white.opacity(0.5))
+                            .padding(12)
+                            .background(Color.black.opacity(0.4))
+                            .clipShape(Circle())
+                    }
+                    .padding(.top, 40)
+                    .padding(.leading, 20)
+                    Spacer()
+                }
+                Spacer()
+            }
+        }
+        .statusBar(hidden: true)
+    }
+}
+
+// MARK: - Barrage Engine
+
+struct BarrageEngineView: View {
+    let text: String
+    let speed: Double
+    let color: Color
+    let isRGB: Bool
+    let isLED: Bool
+    let bgType: BarrageBGType
+    let isTorchSync: Bool
+    let isFullScreen: Bool
+
+    var body: some View {
+        ZStack {
             BarrageBackgroundView(type: bgType)
 
             GeometryReader { geo in
-                MarqueeEngine(text: text, speed: speed, color: color, isRGB: isRGB, isLED: isLED, isTorchSync: isTorchSync, containerSize: geo.size)
+                MarqueeCore(
+                    text: text,
+                    speed: speed,
+                    color: color,
+                    isRGB: isRGB,
+                    isLED: isLED,
+                    isTorchSync: isTorchSync,
+                    containerSize: geo.size,
+                    isFullScreen: isFullScreen
+                )
             }
 
             if isLED {
-                LEDOverlayMask()
+                LEDOverlayLayer()
             }
         }
     }
 }
 
-struct MarqueeEngine: View {
+struct MarqueeCore: View {
     let text: String
     let speed: Double
     let color: Color
@@ -214,31 +298,41 @@ struct MarqueeEngine: View {
     let isLED: Bool
     let isTorchSync: Bool
     let containerSize: CGSize
+    let isFullScreen: Bool
 
     @StateObject private var manager = FlashlightManager.shared
 
     var body: some View {
         TimelineView(.animation) { timelineContext in
             let time = timelineContext.date.timeIntervalSinceReferenceDate
-            let width = textWidth(text)
+            let baseFontSize: CGFloat = isFullScreen ? 200 : 80
+            let width = textWidth(text, size: baseFontSize)
             let duration = 15.0 / speed
             let totalDist = containerSize.width + width
             let progress = (time.truncatingRemainder(dividingBy: duration)) / duration
             let xOffset = containerSize.width - (progress * totalDist)
 
-            Group {
+            ZStack {
                 if isRGB {
                     Text(text)
-                        .foregroundStyle(LinearGradient(colors: [.red, .orange, .yellow, .green, .blue, .purple, .red], startPoint: .leading, endPoint: .trailing))
-                        .hueRotation(.degrees(time * 200))
+                        .font(.system(size: baseFontSize, weight: .black, design: .rounded))
+                        .foregroundColor(.clear)
+                        .overlay(
+                            LinearGradient(colors: [.red, .orange, .yellow, .green, .blue, .purple, .red], startPoint: .leading, endPoint: .trailing)
+                                .hueRotation(.degrees(time * 200))
+                                .mask(
+                                    Text(text)
+                                        .font(.system(size: baseFontSize, weight: .black, design: .rounded))
+                                )
+                        )
                 } else {
                     Text(text)
+                        .font(.system(size: baseFontSize, weight: .black, design: .rounded))
                         .foregroundColor(color)
                 }
             }
-            .font(.system(size: 80, weight: .black, design: .rounded))
             .fixedSize()
-            .offset(x: xOffset, y: containerSize.height / 2 - 45)
+            .offset(x: xOffset, y: (containerSize.height - baseFontSize) / 2)
             .onChange(of: timelineContext.date) { _ in
                 if isTorchSync {
                     let strobe = Int(time * speed * 2) % 2 == 0
@@ -248,22 +342,22 @@ struct MarqueeEngine: View {
         }
     }
 
-    private func textWidth(_ text: String) -> CGFloat {
-        let font = UIFont.systemFont(ofSize: 80, weight: .black)
+    private func textWidth(_ text: String, size: CGFloat) -> CGFloat {
+        let font = UIFont.systemFont(ofSize: size, weight: .black)
         let attributes = [NSAttributedString.Key.font: font]
-        let size = (text as NSString).size(withAttributes: attributes)
-        return size.width
+        let textSize = (text as NSString).size(withAttributes: attributes)
+        return textSize.width
     }
 }
 
-struct LEDOverlayMask: View {
+struct LEDOverlayLayer: View {
     var body: some View {
         Canvas { context, size in
-            let spacing: CGFloat = 5
+            let spacing: CGFloat = 6
             let dotSize: CGFloat = 3
             for x in stride(from: 0, to: size.width, by: spacing) {
                 for y in stride(from: 0, to: size.height, by: spacing) {
-                    context.fill(Path(ellipseIn: CGRect(x: x, y: y, width: dotSize, height: dotSize)), with: .color(.black.opacity(0.7)))
+                    context.fill(Path(ellipseIn: CGRect(x: x, y: y, width: dotSize, height: dotSize)), with: .color(.black.opacity(0.8)))
                 }
             }
         }
@@ -280,58 +374,57 @@ struct BarrageBackgroundView: View {
         ZStack {
             Color.black
             switch type {
-            case .hearts: FallingHeartsView()
-            case .stars: TwinklingStarsView()
-            case .aurora: AuroraWaveView()
-            case .black: EmptyView()
+            case .hearts: FallingHeartsAnimation()
+            case .stars: TwinklingStarsAnimation()
+            case .aurora: AuroraGradientAnimation()
+            case .black: Color.black
             }
         }
     }
 }
 
-struct FallingHeartsView: View {
+struct FallingHeartsAnimation: View {
     var body: some View {
         TimelineView(.animation) { timelineContext in
-            Canvas { gc, size in
-                let time = timelineContext.date.timeIntervalSinceReferenceDate
-                for i in 0..<12 {
+            let time = timelineContext.date.timeIntervalSinceReferenceDate
+            Canvas { context, size in
+                for i in 0..<15 {
                     let seed = Double(i * 345)
                     let x = (sin(time + seed) * 0.4 + 0.5) * size.width
-                    let y = ((time * 0.5 + seed).truncatingRemainder(dividingBy: 1.0)) * size.height
-                    gc.draw(Text("❤️").font(.system(size: 20)), at: CGPoint(x: x, y: y))
+                    let y = ((time * 0.4 + seed).truncatingRemainder(dividingBy: 1.0)) * size.height
+                    context.draw(Text("❤️").font(.system(size: 24)), at: CGPoint(x: x, y: y))
                 }
             }
         }
     }
 }
 
-struct TwinklingStarsView: View {
+struct TwinklingStarsAnimation: View {
     var body: some View {
         TimelineView(.animation) { timelineContext in
-            Canvas { gc, size in
-                let time = timelineContext.date.timeIntervalSinceReferenceDate
-                for i in 0..<40 {
+            let time = timelineContext.date.timeIntervalSinceReferenceDate
+            Canvas { context, size in
+                for i in 0..<50 {
                     let x = Double((i * 789) % Int(size.width))
                     let y = Double((i * 123) % Int(size.height))
-                    let opacity = 0.3 + 0.7 * abs(sin(time + Double(i)))
-                    gc.fill(Path(ellipseIn: CGRect(x: x, y: y, width: 2, height: 2)), with: .color(.white.opacity(opacity)))
+                    let opacity = 0.2 + 0.8 * abs(sin(time + Double(i)))
+                    context.fill(Path(ellipseIn: CGRect(x: x, y: y, width: 2, height: 2)), with: .color(.white.opacity(opacity)))
                 }
             }
         }
     }
 }
 
-struct AuroraWaveView: View {
+struct AuroraGradientAnimation: View {
     var body: some View {
         TimelineView(.animation) { timelineContext in
             LinearGradient(colors: [.blue.opacity(0.4), .green.opacity(0.4), .purple.opacity(0.4)], startPoint: .topLeading, endPoint: .bottomTrailing)
                 .hueRotation(.degrees(timelineContext.date.timeIntervalSinceReferenceDate * 40))
-                .ignoresSafeArea()
         }
     }
 }
 
-// MARK: - Helper Views
+// MARK: - Helper Components
 
 enum BarrageBGType: String {
     case black = "纯黑"
