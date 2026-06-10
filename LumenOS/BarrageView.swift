@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BarrageView: View {
     @StateObject private var manager = FlashlightManager.shared
+    @StateObject private var subManager = SubscriptionManager.shared
 
     // Barrage Settings
     @State private var text: String = "LumenOS 极简弹幕"
@@ -15,6 +16,7 @@ struct BarrageView: View {
     // UI State
     @FocusState private var isInputFocused: Bool
     @State private var showFullScreen: Bool = false
+    @State private var showPaywall = false
 
     let colors: [Color] = [.white, .yellow, .orange, .red, .pink, .purple, .blue, .green]
     let presets = ["捞人", "打 Call", "生日快乐", " (｡♥‿♥｡) ", " ✺◟(∗❛ัᴗ❛ั∗)◞✺ ", "前方高能", "全军出击"]
@@ -31,7 +33,14 @@ struct BarrageView: View {
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.gray)
                         Spacer()
-                        Button(action: { showFullScreen = true }) {
+                        Button(action: {
+                            if subManager.canUseBarrage() {
+                                subManager.recordBarrageUsage()
+                                showFullScreen = true
+                            } else {
+                                showPaywall = true
+                            }
+                        }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "play.fill")
                                 Text("全屏展示")
@@ -204,6 +213,9 @@ struct BarrageView: View {
                 isTorchSync: isTorchSync
             )
         }
+        .sheet(isPresented: $showPaywall) {
+            SubscriptionPaywallView()
+        }
     }
 }
 
@@ -333,7 +345,7 @@ struct MarqueeCore: View {
             }
             .fixedSize()
             .offset(x: xOffset, y: (containerSize.height - baseFontSize) / 2)
-            .onChange(of: timelineContext.date) { _ in
+            .onChange(of: timelineContext.date) { date in
                 if isTorchSync {
                     let strobe = Int(time * speed * 2) % 2 == 0
                     manager.toggle(isOn: strobe, level: 0.3)

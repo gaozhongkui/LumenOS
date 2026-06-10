@@ -1,8 +1,3 @@
-//
-//  ContentView.swift
-//  LumenOS
-//
-
 import SwiftUI
 
 struct ContentView: View {
@@ -33,35 +28,104 @@ struct ContentView: View {
     }
 }
 
-// 简单的“我的”页面
+// 完善后的“我的”页面
 struct ProfileView: View {
+    @StateObject private var subManager = SubscriptionManager.shared
+    @State private var showPaywall = false
+
     var body: some View {
         NavigationView {
             List {
+                // 用户信息头部
                 Section {
-                    HStack {
+                    HStack(spacing: 15) {
                         Image(systemName: "person.circle.fill")
                             .resizable()
                             .frame(width: 60, height: 60)
                             .foregroundColor(.gray)
-                        VStack(alignment: .leading) {
+
+                        VStack(alignment: .leading, spacing: 4) {
                             Text("Lumen 用户")
                                 .font(.headline)
-                            Text("ID: 12345678")
+                            Text("ID: 88889999")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
+                        }
+
+                        Spacer()
+
+                        if subManager.isSubscribed {
+                            Text("PRO")
+                                .font(.system(size: 12, weight: .bold))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.yellow)
+                                .foregroundColor(.black)
+                                .cornerRadius(4)
                         }
                     }
                     .padding(.vertical, 8)
                 }
 
+                // 订阅状态及购买
+                Section(header: Text("账号状态")) {
+                    HStack {
+                        Label("永久专业版", systemImage: "crown.fill")
+                            .foregroundColor(subManager.isSubscribed ? .yellow : .gray)
+                        Spacer()
+                        Text(subManager.isSubscribed ? "已激活" : "未解锁")
+                            .foregroundColor(.gray)
+                    }
+
+                    if !subManager.isSubscribed {
+                        Button(action: { showPaywall = true }) {
+                            Text("立即解锁专业版 ($0.99)")
+                                .foregroundColor(.yellow)
+                                .fontWeight(.bold)
+                        }
+                    } else {
+                        HStack {
+                            Text("感谢支持！您已解锁所有功能")
+                                .font(.footnote)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                }
+
                 Section(header: Text("常用功能")) {
-                    Label("设置", systemImage: "gear")
-                    Label("意见反馈", systemImage: "envelope")
-                    Label("关于我们", systemImage: "info.circle")
+                    NavigationLink(destination: Text("设置页面")) {
+                        Label("应用设置", systemImage: "gear")
+                    }
+
+                    Button(action: {
+                        // 模拟反馈邮件或跳转
+                    }) {
+                        Label("意见反馈", systemImage: "envelope")
+                    }
+                    .foregroundColor(.white)
+
+                    NavigationLink(destination: Text("关于我们页面")) {
+                        Label("关于我们", systemImage: "info.circle")
+                    }
+                }
+
+                Section {
+                    Button(action: {
+                        Task {
+                            await subManager.updatePurchaseStatus()
+                        }
+                    }) {
+                        Text("恢复购买")
+                            .frame(maxWidth: .infinity)
+                            .alignmentGuide(.leading) { _ in 0 }
+                    }
+                    .foregroundColor(.gray)
                 }
             }
             .navigationTitle("我的")
+            .sheet(isPresented: $showPaywall) {
+                SubscriptionPaywallView()
+            }
         }
     }
 }

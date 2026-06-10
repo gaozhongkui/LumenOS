@@ -2,10 +2,13 @@ import SwiftUI
 
 struct FlashlightView: View {
     @StateObject private var manager = FlashlightManager.shared
+    @StateObject private var subManager = SubscriptionManager.shared
+
     @State private var isOn = false
     @State private var intensity: CGFloat = 0.6
     @State private var rotation: Double = 0
     @State private var selectedColor: Color = .yellow
+    @State private var showPaywall = false
 
     var body: some View {
         ZStack {
@@ -21,8 +24,17 @@ struct FlashlightView: View {
                         .toggleStyle(CustomToggleStyle())
                         .frame(width: 60)
                         .onChange(of: isOn) { newValue in
-                            manager.toggle(isOn: newValue, level: Float(intensity))
-                            manager.triggerHapticFeedback()
+                            if newValue {
+                                if subManager.canUseFlashlight() {
+                                    subManager.recordFlashlightUsage()
+                                    applyFlashlightChange(isOn: true)
+                                } else {
+                                    isOn = false
+                                    showPaywall = true
+                                }
+                            } else {
+                                applyFlashlightChange(isOn: false)
+                            }
                         }
                     Spacer()
                     HStack(spacing: 4) {
@@ -54,7 +66,17 @@ struct FlashlightView: View {
                             .frame(width: CGFloat(140 + i * 40), height: CGFloat(140 + i * 40))
                     }
 
-                    Button(action: { isOn.toggle() }) {
+                    Button(action: {
+                        if !isOn {
+                            if subManager.canUseFlashlight() {
+                                isOn = true
+                            } else {
+                                showPaywall = true
+                            }
+                        } else {
+                            isOn = false
+                        }
+                    }) {
                         ZStack {
                             Circle()
                                 .fill(LinearGradient(gradient: Gradient(colors: [Color(white: 0.2), Color(white: 0.1)]), startPoint: .top, endPoint: .bottom))
@@ -190,9 +212,18 @@ struct FlashlightView: View {
                 .padding(.bottom, 30)
             }
         }
+        .sheet(isPresented: $showPaywall) {
+            SubscriptionPaywallView()
+        }
+    }
+
+    private func applyFlashlightChange(isOn: Bool) {
+        manager.toggle(isOn: isOn, level: Float(intensity))
+        manager.triggerHapticFeedback()
     }
 }
 
+// 辅助组件
 struct ModeLabel: View {
     var text: String? = nil
     var icon: String? = nil
@@ -234,6 +265,78 @@ struct CustomToggleStyle: ToggleStyle {
                         .offset(x: configuration.isOn ? 11 : -11)
                 )
         }
+    }
+}
+
+// 订阅页面组件
+struct SubscriptionPaywallView: View {
+    @Environment(\.dismiss) var dismiss
+    @StateObject private var subManager = SubscriptionManager.shared
+    @State private var isPurchasing = false
+
+    var body: some View {
+        VStack(spacing: 30) {
+            Spacer()
+
+            Image(systemName: "crown.fill")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 100, height: 100)
+                .foregroundColor(.yellow)
+
+            VStack(spacing: 15) {
+                Text("开启无限可能")
+                    .font(.title)
+                    .fontWeight(.bold)
+
+                Text("您的免费使用次数已用完，订阅以继续享受手电筒、动态弹幕和所有高级功能。")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal)
+            }
+
+            VStack(spacing: 15) {
+                Button(action: {
+                    Task {
+                        isPurchasing = true
+                        do {
+                            try await subManager.purchase()
+                            if subManager.isSubscribed {
+                                dismiss()
+                            }
+                        } catch {
+                            print("Purchase failed: \(error)")
+                        }
+                        isPurchasing = false
+                    }
+                }) {
+                    HStack {
+                        if isPurchasing {
+                            ProgressView().tint(.black).padding(.trailing, 5)
+                        }
+                        Text("立即订阅 - $0.99")
+                    }
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.yellow)
+                    .foregroundColor(.black)
+                    .cornerRadius(12)
+                }
+                .disabled(isPurchasing)
+
+                Button(action: { dismiss() }) {
+                    Text("暂不需要")
+                        .foregroundColor(.gray)
+                }
+            }
+            .padding(.horizontal, 30)
+
+            Spacer()
+        }
+        .background(Color(red: 0.05, green: 0.07, blue: 0.12).ignoresSafeArea())
+        .preferredColorScheme(.dark)
     }
 }
 
