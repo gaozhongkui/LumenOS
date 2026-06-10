@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LumenOS - Professional Light & Shadow Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0A0C14; color: #FFFFFF; scroll-behavior: smooth; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .gradient-text { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .phone-case { border: 12px solid #1A1A1A; border-radius: 3.5rem; background: #050505; box-shadow: 0 50px 100px -20px rgba(0,0,0,1); position: relative; overflow: hidden; border-color: #222; }
+        .dynamic-island { width: 110px; height: 30px; background: #000; border-radius: 20px; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 50; }
+
+        /* Intensity Bar Mockup */
+        .intensity-segment { height: 6px; width: 30px; border-radius: 1px; margin-bottom: 3px; }
+        .intensity-on { background: linear-gradient(90deg, #FFD700, #FFA500); }
+        .intensity-off { background: rgba(255,255,255,0.1); }
+
+        /* Knob Mockup */
+        .knob-outer { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(180deg, #2A2A2A, #111); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; position: relative; }
+        .knob-indicator { position: absolute; width: 3px; height: 12px; background: #FFD700; top: 10px; border-radius: 2px; transform-origin: 50% 50px; }
+
+        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        .animate-marquee { display: inline-block; animation: marquee 8s linear infinite; }
+
+        .feature-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(255, 215, 0, 0.1); color: #FFD700; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 px-6 py-4 glass-card border-none bg-black/60">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="text-2xl font-black tracking-tighter gradient-text">LumenOS</div>
+            <div class="hidden md:flex space-x-10 text-xs font-bold uppercase tracking-widest text-gray-400">
+                <a href="#features" class="hover:text-white transition">Features</a>
+                <a href="#torchsync" class="hover:text-white transition">TorchSync™</a>
+                <a href="#specs" class="hover:text-white transition">Tech Specs</a>
+            </div>
+            <button class="px-6 py-2.5 bg-yellow-500 text-black text-[11px] font-black uppercase tracking-widest rounded-full hover:bg-yellow-400 transition shadow-xl shadow-yellow-500/20">Get Pro</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-40 pb-24 px-6">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-yellow-500 mb-8">
+                The Ultimate Light Utility for iOS
+            </div>
+            <h1 class="text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-none">
+                Illuminate with <br><span class="gradient-text">Precision.</span>
+            </h1>
+            <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-16 font-light leading-relaxed">
+                Experience a professional-grade flashlight with linear intensity control, paired with a cinematic LED barrage system. Designed for clarity, utility, and creative expression.
+            </p>
+
+            <!-- Previews -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 max-w-6xl mx-auto mt-20">
+
+                <!-- Phone 1: Flashlight UI -->
+                <div class="group">
+                    <div class="phone-case w-[300px] h-[620px] mx-auto border-yellow-500/10">
+                        <div class="dynamic-island"></div>
+                        <div class="p-6 pt-14 flex flex-col h-full bg-[#050505]">
+                            <div class="flex justify-between items-center text-[11px] font-medium text-gray-500 mb-12 px-2">
+                                <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span> Pro Active</span>
+                                <span class="flex items-center gap-2">27°C <span class="text-green-500">85%</span></span>
+                            </div>
+
+                            <!-- Power Button Area -->
+                            <div class="flex-1 flex flex-col items-center">
+                                <div class="w-36 h-36 rounded-full border border-yellow-500/20 flex items-center justify-center relative">
+                                    <div class="absolute inset-0 rounded-full bg-yellow-500/5 blur-3xl"></div>
+                                    <div class="w-28 h-28 rounded-full bg-gradient-to-b from-[#222] to-[#000] border border-white/5 flex items-center justify-center shadow-2xl">
+                                        <svg class="w-12 h-12 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Controls Area (Match Swift UI) -->
+                            <div class="flex justify-between items-end pb-10 px-2">
+                                <!-- Intensity Bar -->
+                                <div class="bg-black/40 p-1.5 rounded-xl border border-white/5">
+                                    <div class="intensity-segment intensity-on"></div>
+                                    <div class="intensity-segment intensity-on"></div>
+                                    <div class="intensity-segment intensity-on"></div>
+                                    <div class="intensity-segment intensity-on"></div>
+                                    <div class="intensity-segment intensity-off"></div>
+                                    <div class="intensity-segment intensity-off"></div>
+                                    <div class="intensity-segment intensity-off"></div>
+                                    <div class="intensity-segment intensity-off"></div>
+                                    <div class="text-[8px] text-gray-600 mt-2 text-center font-bold">DIM</div>
+                                </div>
+
+                                <!-- Mode Knob -->
+                                <div class="flex flex-col items-center gap-4">
+                                    <div class="knob-outer">
+                                        <div class="knob-indicator" style="transform: rotate(45deg);"></div>
+                                        <div class="w-16 h-16 rounded-full bg-[#151515] border border-white/5 shadow-inner"></div>
+                                    </div>
+                                    <span class="text-[9px] font-bold text-yellow-500 tracking-widest uppercase">SOS Mode</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-8 text-sm font-bold tracking-widest text-gray-500 uppercase">Pro Flashlight Interface</p>
+                </div>
+
+                <!-- Phone 2: Barrage UI -->
+                <div class="group">
+                    <div class="phone-case w-[300px] h-[620px] mx-auto border-blue-500/10">
+                        <div class="dynamic-island"></div>
+                        <div class="p-5 pt-14 h-full flex flex-col bg-[#050505]">
+                            <div class="text-[11px] font-bold text-gray-500 mb-6 px-2 uppercase tracking-tighter">Live Preview</div>
+
+                            <!-- Cinematic Preview Box -->
+                            <div class="h-44 w-full bg-black border border-white/10 rounded-[2rem] flex items-center justify-center overflow-hidden mb-10 relative">
+                                <!-- Star Background Animation Mock -->
+                                <div class="absolute inset-0 opacity-30">
+                                    <div class="absolute top-10 left-10 w-1 h-1 bg-white rounded-full"></div>
+                                    <div class="absolute top-20 right-20 w-1 h-1 bg-white rounded-full"></div>
+                                    <div class="absolute bottom-10 left-32 w-1 h-1 bg-white rounded-full"></div>
+                                </div>
+                                <div class="animate-marquee whitespace-nowrap text-4xl font-black italic tracking-tighter text-yellow-400">
+                                    WELCOME TO LUMENOS • SYNC ACTIVE •
+                                </div>
+                            </div>
+
+                            <!-- LED Controls -->
+                            <div class="space-y-8 px-2">
+                                <div class="flex gap-3">
+                                    <div class="h-12 flex-1 bg-white/5 rounded-2xl border border-white/10 flex items-center px-4 text-[11px] text-gray-500 italic">
+                                        Type your message...
+                                    </div>
+                                    <div class="w-12 h-12 bg-yellow-500 rounded-2xl flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-yellow-500 p-4 rounded-2xl flex flex-col items-center gap-2">
+                                        <div class="w-5 h-5 text-black"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                                        <span class="text-[9px] font-black text-black uppercase">TorchSync™</span>
+                                    </div>
+                                    <div class="bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-2">
+                                        <div class="w-5 h-5 text-gray-400"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></div>
+                                        <span class="text-[9px] font-black text-gray-400 uppercase">LED Matrix</span>
+                                    </div>
+                                </div>
+
+                                <!-- BG Presets -->
+                                <div class="flex justify-between items-center gap-2 overflow-hidden">
+                                    <div class="px-4 py-2 bg-white/10 rounded-full text-[8px] font-bold text-white uppercase">Aurora</div>
+                                    <div class="px-4 py-2 bg-white/5 rounded-full text-[8px] font-bold text-gray-500 uppercase border border-white/5">Stars</div>
+                                    <div class="px-4 py-2 bg-white/5 rounded-full text-[8px] font-bold text-gray-500 uppercase border border-white/5">Hearts</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-8 text-sm font-bold tracking-widest text-gray-500 uppercase">Creative Barrage Engine</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Features -->
+    <section id="features" class="py-32 px-6 bg-[#080A10]">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-3 gap-12">
+                <div class="glass-card p-10 rounded-[2.5rem]">
+                    <div class="feature-icon text-2xl">⚡️</div>
+                    <h3 class="text-xl font-bold mb-4">Precision Hardware Control</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-6">
+                        Linear brightness adjustment from 1% to 100%. Integrated hardware monitoring displays real-time device temperature and battery health.
+                    </p>
+                    <ul class="text-[11px] font-bold text-yellow-500/80 space-y-2 uppercase tracking-tighter">
+                        <li>• Thermal Protection</li>
+                        <li>• SOS & Strobe Presets</li>
+                        <li>• Haptic Feedback Engine</li>
+                    </ul>
+                </div>
+
+                <div class="glass-card p-10 rounded-[2.5rem]">
+                    <div class="feature-icon text-2xl">🎨</div>
+                    <h3 class="text-xl font-bold mb-4">Dynamic Visual Engine</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-6">
+                        Transform your screen into a high-impact LED display. Features RGB gradients, dot-matrix simulation, and cinematic background animations.
+                    </p>
+                    <ul class="text-[11px] font-bold text-yellow-500/80 space-y-2 uppercase tracking-tighter">
+                        <li>• Aurora & Star Fields</li>
+                        <li>• Custom Scroll Velocity</li>
+                        <li>• Full Spectrum RGB</li>
+                    </ul>
+                </div>
+
+                <div id="torchsync" class="glass-card p-10 rounded-[2.5rem] border-yellow-500/20 bg-yellow-500/[0.02]">
+                    <div class="feature-icon text-2xl">🔗</div>
+                    <h3 class="text-xl font-bold mb-4">TorchSync™ Technology</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-6">
+                        An industry-first synchronization engine. Your device's physical flashlight pulses in perfect rhythm with your scrolling barrage text.
+                    </p>
+                    <div class="px-4 py-2 bg-yellow-500 text-black text-[10px] font-black rounded-lg inline-block uppercase">Exclusive Feature</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Tech Section -->
+    <section id="specs" class="py-32 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-16">Designed for Professionals. <br><span class="text-gray-600">Built for Everyone.</span></h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="text-3xl font-black mb-1">100%</div>
+                    <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Linear Control</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-black mb-1">0ms</div>
+                    <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sync Latency</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-black mb-1">RGB</div>
+                    <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Color Engine</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-black mb-1">Pro</div>
+                    <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Haptic Ready</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-20 text-center border-t border-white/5">
+        <div class="text-2xl font-black tracking-tighter gradient-text mb-4">LumenOS</div>
+        <p class="text-gray-600 text-[11px] uppercase tracking-[0.2em] mb-8 font-bold">Utility • Creativity • Precision</p>
+        <div class="flex justify-center space-x-8 mb-12">
+            <a href="#" class="text-gray-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">Privacy</a>
+            <a href="#" class="text-gray-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">Terms</a>
+            <a href="#" class="text-gray-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">Support</a>
+        </div>
+        <p class="text-gray-700 text-[10px]">© 2024 LumenOS. Crafted for the iPhone experience.</p>
+    </footer>
+
+</body>
+</html>
