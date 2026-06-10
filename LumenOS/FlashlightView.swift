@@ -61,7 +61,7 @@ struct FlashlightView: View {
                             .transition(.opacity.animation(.easeInOut))
                     }
 
-                    ForEach(0..<3) { i in
+                    ForEach(0..<4) { i in
                         Circle()
                             .stroke(isOn ? selectedColor.opacity(0.2) : Color.white.opacity(0.05), lineWidth: 1)
                             .frame(width: CGFloat(140 + i * 40), height: CGFloat(140 + i * 40))
@@ -113,16 +113,20 @@ struct FlashlightView: View {
                     Spacer()
 
                     // 2. Mode Knob
-                    VStack(spacing: 15) {
+                    VStack(spacing: 20) {
                         ZStack {
-                            // Mode Labels
-                            ModeLabel(text: NSLocalizedString("mode_sos", comment: ""), angle: 0)
-                            ModeLabel(icon: "rays", angle: -45)
-                            ModeLabel(icon: "antenna.radiowaves.left.and.right", angle: -90)
-                            ModeLabel(icon: "speaker.slash.fill", angle: -135)
+                            // Dashed guide circle
+                            Circle()
+                                .stroke(Color.white.opacity(0.1), style: StrokeStyle(lineWidth: 1, dash: [2, 4]))
+                                .frame(width: 140, height: 140)
 
-                            ModeText(text: NSLocalizedString("mode_party", comment: ""), angle: 45)
-                            ModeText(text: NSLocalizedString("mode_setc", comment: ""), angle: 90)
+                            // Mode Items (Dots and Labels)
+                            ModeItem(text: NSLocalizedString("mode_sos", comment: ""), angle: 0, currentRotation: rotation)
+                            ModeItem(icon: "rays", angle: -45, currentRotation: rotation)
+                            ModeItem(icon: "antenna.radiowaves.left.and.right", angle: -90, currentRotation: rotation)
+                            ModeItem(icon: "speaker.slash.fill", angle: -135, currentRotation: rotation)
+                            ModeItem(text: NSLocalizedString("mode_party", comment: ""), angle: 45, currentRotation: rotation)
+                            ModeItem(text: NSLocalizedString("mode_setc", comment: ""), angle: 90, currentRotation: rotation)
 
                             KnobUI(rotation: rotation, selectedColor: selectedColor)
                                 .gesture(
@@ -135,13 +139,14 @@ struct FlashlightView: View {
                                         }
                                 )
 
-                            Rectangle()
+                            // Knob Indicator
+                            RoundedRectangle(cornerRadius: 1)
                                 .fill(selectedColor)
-                                .frame(width: 2, height: 12)
+                                .frame(width: 3, height: 12)
                                 .offset(y: -42)
                                 .rotationEffect(.degrees(rotation))
                         }
-                        .frame(width: 160, height: 160)
+                        .frame(width: 180, height: 180)
 
                         Text(NSLocalizedString("label_color", comment: ""))
                             .font(.system(size: 14))
@@ -166,9 +171,13 @@ struct FlashlightView: View {
     }
 
     private func updateMode() {
-        if abs(rotation) < 20 { manager.currentMode = .sos }
-        else if rotation > -60 && rotation < -30 { manager.currentMode = .strobe }
+        let r = rotation.truncatingRemainder(dividingBy: 360)
+        let normalized = r < -180 ? r + 360 : (r > 180 ? r - 360 : r)
+
+        if abs(normalized) < 20 { manager.currentMode = .sos }
+        else if normalized > -60 && normalized < -30 { manager.currentMode = .strobe }
         else { manager.currentMode = .standard }
+
         if isOn { manager.toggle(isOn: true, level: Float(intensity)) }
     }
 
@@ -189,7 +198,10 @@ struct PowerButtonUI: View {
                 .frame(width: 120, height: 120).shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 10)
             Circle().stroke(isOn ? selectedColor.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 2)
                 .frame(width: 100, height: 100)
-            Image(systemName: "power").font(.system(size: 40, weight: .light)).foregroundColor(isOn ? selectedColor : .gray)
+            Image(systemName: "power")
+                .font(.system(size: 40, weight: .light))
+                .foregroundColor(isOn ? selectedColor : .gray)
+                .shadow(color: isOn ? selectedColor.opacity(0.8) : .clear, radius: 10)
         }
     }
 }
@@ -222,38 +234,59 @@ struct KnobUI: View {
     }
 }
 
+struct ModeItem: View {
+    var text: String? = nil
+    var icon: String? = nil
+    var angle: Double
+    var currentRotation: Double
+
+    var isSelected: Bool {
+        let r = currentRotation.truncatingRemainder(dividingBy: 360)
+        let normalized = r < -180 ? r + 360 : (r > 180 ? r - 360 : r)
+        return abs(normalized - angle) < 15
+    }
+
+    var body: some View {
+        ZStack {
+            // Dot on dashed circle
+            Circle()
+                .fill(isSelected ? .yellow : Color.white.opacity(0.4))
+                .frame(width: 4, height: 4)
+                .offset(y: -70)
+                .rotationEffect(.degrees(angle))
+
+            // Label
+            Group {
+                if let text = text {
+                    Text(text)
+                } else if let icon = icon {
+                    Image(systemName: icon)
+                }
+            }
+            .font(.system(size: 10, weight: isSelected ? .bold : .medium))
+            .foregroundColor(isSelected ? .yellow : .white.opacity(0.6))
+            .rotationEffect(.degrees(-angle)) // Counter-rotate to stay upright
+            .offset(y: -85)
+            .rotationEffect(.degrees(angle))
+        }
+    }
+}
+
 struct ColorPickerUI: View {
     @Binding var selectedColor: Color
     var body: some View {
         ZStack {
             ColorPicker("", selection: $selectedColor).labelsHidden().scaleEffect(3).frame(width: 44, height: 44).mask(Circle()).zIndex(1)
             Circle().fill(AngularGradient(gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple, .red]), center: .center))
-                .frame(width: 44, height: 44).overlay(Circle().stroke(Color.white, lineWidth: 2).frame(width: 12, height: 12).offset(x: 10, y: 0))
+                .frame(width: 44, height: 44)
+                .overlay(
+                    Circle()
+                        .stroke(Color.white, lineWidth: 2)
+                        .frame(width: 12, height: 12)
+                        .offset(x: 12) // Approximate position, would need color-to-angle logic for perfect accuracy
+                )
                 .shadow(radius: 5).allowsHitTesting(false).zIndex(2)
         }
-    }
-}
-
-struct ModeLabel: View {
-    var text: String? = nil
-    var icon: String? = nil
-    var angle: Double
-    var body: some View {
-        Group {
-            if let text = text { Text(text) }
-            else if let icon = icon { Image(systemName: icon) }
-        }
-        .font(.system(size: 10, weight: .medium)).foregroundColor(.white.opacity(0.6))
-        .offset(y: -80).rotationEffect(.degrees(angle))
-    }
-}
-
-struct ModeText: View {
-    var text: String
-    var angle: Double
-    var body: some View {
-        Text(text).font(.system(size: 10, weight: .medium)).foregroundColor(.white.opacity(0.6))
-            .offset(x: 75).rotationEffect(.degrees(angle - 90))
     }
 }
 

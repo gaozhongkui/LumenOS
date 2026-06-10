@@ -15,10 +15,28 @@
 		05FA96312FD93840002C38ED /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		05FA96412FD9480D002C38ED /* Exceptions for "Data" folder in "LumenOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"App Icon.png",
+			);
+			target = 05FA95422FD8FE86002C38ED /* LumenOS */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		05FA95452FD8FE86002C38ED /* LumenOS */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = LumenOS;
+			sourceTree = "<group>";
+		};
+		05FA963F2FD947E2002C38ED /* Data */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				05FA96412FD9480D002C38ED /* Exceptions for "Data" folder in "LumenOS" target */,
+			);
+			path = Data;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -38,6 +56,7 @@
 		05FA953A2FD8FE86002C38ED = {
 			isa = PBXGroup;
 			children = (
+				05FA963F2FD947E2002C38ED /* Data */,
 				05FA95452FD8FE86002C38ED /* LumenOS */,
 				05FA96302FD93840002C38ED /* Frameworks */,
 				05FA95442FD8FE86002C38ED /* Products */,
@@ -77,6 +96,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				05FA95452FD8FE86002C38ED /* LumenOS */,
+				05FA963F2FD947E2002C38ED /* Data */,
 			);
 			name = LumenOS;
 			packageProductDependencies = (
