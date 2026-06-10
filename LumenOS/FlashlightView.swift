@@ -1,20 +1,19 @@
 import SwiftUI
 
 struct FlashlightView: View {
-    // 引入手电筒管理器
     @StateObject private var manager = FlashlightManager.shared
-
     @State private var isOn = false
     @State private var intensity: CGFloat = 0.6
     @State private var rotation: Double = 0
+    @State private var selectedColor: Color = .yellow
 
     var body: some View {
         ZStack {
-            // 背景
+            // 背景深蓝黑色
             Color(red: 0.05, green: 0.07, blue: 0.12)
                 .ignoresSafeArea()
 
-            VStack(spacing: 20) {
+            VStack(spacing: 0) {
                 // 顶部状态栏
                 HStack {
                     Spacer()
@@ -22,7 +21,6 @@ struct FlashlightView: View {
                         .toggleStyle(CustomToggleStyle())
                         .frame(width: 60)
                         .onChange(of: isOn) { newValue in
-                            // 同步硬件开关
                             manager.toggle(isOn: newValue, level: Float(intensity))
                             manager.triggerHapticFeedback()
                         }
@@ -43,25 +41,20 @@ struct FlashlightView: View {
 
                 // 中央电源大按钮
                 ZStack {
-                    // 开启时的光晕效果 (随亮度变化)
                     if isOn {
                         Circle()
-                            .fill(RadialGradient(gradient: Gradient(colors: [Color.yellow.opacity(0.4 * intensity), Color.clear]), center: .center, startRadius: 50, endRadius: 150))
+                            .fill(RadialGradient(gradient: Gradient(colors: [selectedColor.opacity(0.4 * intensity), Color.clear]), center: .center, startRadius: 50, endRadius: 150))
                             .frame(width: 300, height: 300)
                             .transition(.opacity.animation(.easeInOut))
                     }
 
-                    // 装饰性波纹圆环
                     ForEach(0..<3) { i in
                         Circle()
-                            .stroke(isOn ? Color.yellow.opacity(0.2) : Color.white.opacity(0.05), lineWidth: 1)
+                            .stroke(isOn ? selectedColor.opacity(0.2) : Color.white.opacity(0.05), lineWidth: 1)
                             .frame(width: CGFloat(140 + i * 40), height: CGFloat(140 + i * 40))
                     }
 
-                    // 主电源按钮
-                    Button(action: {
-                        isOn.toggle()
-                    }) {
+                    Button(action: { isOn.toggle() }) {
                         ZStack {
                             Circle()
                                 .fill(LinearGradient(gradient: Gradient(colors: [Color(white: 0.2), Color(white: 0.1)]), startPoint: .top, endPoint: .bottom))
@@ -69,12 +62,12 @@ struct FlashlightView: View {
                                 .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 10)
 
                             Circle()
-                                .stroke(isOn ? Color.yellow.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 2)
+                                .stroke(isOn ? selectedColor.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 2)
                                 .frame(width: 100, height: 100)
 
                             Image(systemName: "power")
                                 .font(.system(size: 40, weight: .light))
-                                .foregroundColor(isOn ? .yellow : .gray)
+                                .foregroundColor(isOn ? selectedColor : .gray)
                         }
                     }
                 }
@@ -83,39 +76,36 @@ struct FlashlightView: View {
                 Spacer()
 
                 // 底部控制面板
-                HStack(alignment: .bottom, spacing: 30) {
-                    // 亮度调节条 (左侧)
+                HStack(alignment: .bottom) {
+                    // 1. 亮度调节条
                     VStack(spacing: 5) {
                         Text("100%")
                             .font(.system(size: 10))
                             .foregroundColor(.gray)
 
-                        VStack(spacing: 2) {
-                            ForEach((0..<20).reversed(), id: \.self) { i in
+                        VStack(spacing: 3) {
+                            ForEach((0..<18).reversed(), id: \.self) { i in
                                 Rectangle()
-                                    .fill(CGFloat(i) / 20.0 < intensity ?
-                                          LinearGradient(gradient: Gradient(colors: [.yellow, .orange]), startPoint: .leading, endPoint: .trailing) :
-                                          LinearGradient(gradient: Gradient(colors: [Color(white: 0.2), Color(white: 0.1)]), startPoint: .leading, endPoint: .trailing))
-                                    .frame(width: 40, height: 6)
-                                    .cornerRadius(2)
+                                    .fill(CGFloat(i) / 18.0 < intensity ?
+                                          LinearGradient(gradient: Gradient(colors: [selectedColor, selectedColor.opacity(0.7)]), startPoint: .leading, endPoint: .trailing) :
+                                          LinearGradient(gradient: Gradient(colors: [Color(white: 0.15), Color(white: 0.1)]), startPoint: .leading, endPoint: .trailing))
+                                    .frame(width: 35, height: 6)
+                                    .cornerRadius(1)
                             }
                         }
-                        .padding(4)
+                        .padding(5)
                         .background(Color.black.opacity(0.3))
-                        .cornerRadius(8)
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.3), lineWidth: 1))
+                        .cornerRadius(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.1), lineWidth: 1))
                         .gesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { value in
-                                    let barHeight: CGFloat = 160 // 容器大概高度
+                                    let barHeight: CGFloat = 170
                                     let dragValue = 1.0 - (value.location.y / barHeight)
                                     let newIntensity = max(0.01, min(dragValue, 1.0))
-
                                     if abs(newIntensity - intensity) > 0.02 {
                                         intensity = newIntensity
-                                        if isOn {
-                                            manager.setIntensity(Float(intensity))
-                                        }
+                                        if isOn { manager.setIntensity(Float(intensity)) }
                                         manager.triggerSelectionFeedback()
                                     }
                                 }
@@ -126,88 +116,95 @@ struct FlashlightView: View {
                             .foregroundColor(.gray)
                     }
 
-                    // 模式切换旋钮 (中间)
-                    VStack {
-                        ZStack {
-                            // 环绕模式标签
-                            ModeLabel(text: "SOS", angle: -30)
-                            ModeLabel(icon: "rays", angle: -70)
-                            ModeLabel(icon: "antenna.radiowaves.left.and.right", angle: -110)
-                            ModeLabel(icon: "speaker.slash.fill", angle: -150)
-                            ModeLabel(icon: "flashlight.on.fill", angle: 10)
-                            ModeText(text: "Party Mode", angle: 40)
-                            ModeText(text: "Setc", angle: 70)
+                    Spacer()
 
-                            // 旋钮主体与旋转手势
+                    // 2. 中间旋钮
+                    VStack(spacing: 15) {
+                        ZStack {
+                            // 模式标签位置
+                            ModeLabel(text: "SOS", angle: 0)
+                            ModeLabel(icon: "rays", angle: -45)
+                            ModeLabel(icon: "antenna.radiowaves.left.and.right", angle: -90)
+                            ModeLabel(icon: "speaker.slash.fill", angle: -135)
+
+                            ModeText(text: "Party Mode", angle: 45)
+                            ModeText(text: "Setc", angle: 90)
+
                             Circle()
                                 .fill(LinearGradient(gradient: Gradient(colors: [Color(white: 0.2), Color(white: 0.1)]), startPoint: .top, endPoint: .bottom))
-                                .frame(width: 120, height: 120)
-                                .shadow(radius: 5)
-                                .overlay(Circle().stroke(Color.gray.opacity(0.3), lineWidth: 1))
+                                .frame(width: 110, height: 110)
+                                .shadow(radius: 10)
+                                .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
                                 .gesture(
                                     DragGesture()
                                         .onChanged { value in
-                                            let vector = CGVector(dx: value.location.x - 60, dy: value.location.y - 60)
+                                            let vector = CGVector(dx: value.location.x - 55, dy: value.location.y - 55)
                                             let angle = atan2(vector.dy, vector.dx)
-                                            let degrees = angle * 180 / .pi
-                                            rotation = degrees + 90 // 修正起始角度
+                                            rotation = angle * 180 / .pi + 90
                                             manager.triggerSelectionFeedback()
                                         }
                                 )
 
-                            // 旋钮指示器
                             Rectangle()
-                                .fill(Color.yellow)
-                                .frame(width: 2, height: 15)
-                                .offset(y: -45)
+                                .fill(selectedColor)
+                                .frame(width: 2, height: 12)
+                                .offset(y: -42)
                                 .rotationEffect(.degrees(rotation))
                         }
-                        .frame(width: 180, height: 180)
+                        .frame(width: 160, height: 160)
 
                         Text("Color")
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
                     }
 
-                    // 颜色选择预览 (右侧)
-                    VStack {
-                        Circle()
-                            .fill(AngularGradient(gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple, .red]), center: .center))
-                            .frame(width: 50, height: 50)
-                            .overlay(
-                                Circle()
-                                    .stroke(Color.white, lineWidth: 2)
-                                    .frame(width: 15, height: 15)
-                                    .offset(x: 10, y: 0)
-                            )
-                            .shadow(radius: 5)
+                    Spacer()
 
-                        Spacer().frame(height: 20)
+                    // 3. 颜色选择器
+                    VStack {
+                        ZStack {
+                            ColorPicker("", selection: $selectedColor)
+                                .labelsHidden()
+                                .scaleEffect(3)
+                                .frame(width: 44, height: 44)
+                                .mask(Circle())
+                                .zIndex(1)
+
+                            Circle()
+                                .fill(AngularGradient(gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple, .red]), center: .center))
+                                .frame(width: 44, height: 44)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white, lineWidth: 2)
+                                        .frame(width: 12, height: 12)
+                                        .offset(x: 10, y: 0)
+                                )
+                                .shadow(radius: 5)
+                                .allowsHitTesting(false)
+                                .zIndex(2)
+                        }
+                        Spacer().frame(height: 25)
                     }
                 }
-                .padding(.bottom, 40)
+                .padding(.horizontal, 25)
+                .padding(.bottom, 30)
             }
         }
     }
 }
 
-// 辅助组件保持不变
 struct ModeLabel: View {
     var text: String? = nil
     var icon: String? = nil
     var angle: Double
-
     var body: some View {
         Group {
-            if let text = text {
-                Text(text)
-            } else if let icon = icon {
-                Image(systemName: icon)
-            }
+            if let text = text { Text(text) }
+            else if let icon = icon { Image(systemName: icon) }
         }
-        .font(.system(size: 10))
-        .foregroundColor(.gray)
-        .offset(y: -85)
+        .font(.system(size: 10, weight: .medium))
+        .foregroundColor(.white.opacity(0.6))
+        .offset(y: -80)
         .rotationEffect(.degrees(angle))
     }
 }
@@ -215,13 +212,12 @@ struct ModeLabel: View {
 struct ModeText: View {
     var text: String
     var angle: Double
-
     var body: some View {
         Text(text)
-            .font(.system(size: 10))
-            .foregroundColor(.gray)
-            .offset(x: 80)
-            .rotationEffect(.degrees(angle))
+            .font(.system(size: 10, weight: .medium))
+            .foregroundColor(.white.opacity(0.6))
+            .offset(x: 75)
+            .rotationEffect(.degrees(angle - 90))
     }
 }
 
@@ -229,13 +225,13 @@ struct CustomToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         Button(action: { configuration.isOn.toggle() }) {
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(white: 0.2))
-                .frame(width: 50, height: 26)
+                .fill(Color(white: 0.15))
+                .frame(width: 50, height: 28)
                 .overlay(
                     Circle()
-                        .fill(LinearGradient(gradient: Gradient(colors: [.yellow, .orange.opacity(0.7)]), startPoint: .top, endPoint: .bottom))
+                        .fill(LinearGradient(gradient: Gradient(colors: [.yellow, .orange]), startPoint: .top, endPoint: .bottom))
                         .padding(3)
-                        .offset(x: configuration.isOn ? 12 : -12)
+                        .offset(x: configuration.isOn ? 11 : -11)
                 )
         }
     }
