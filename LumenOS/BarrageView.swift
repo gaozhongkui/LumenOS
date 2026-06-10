@@ -5,7 +5,7 @@ struct BarrageView: View {
     @StateObject private var subManager = SubscriptionManager.shared
 
     // Barrage Settings
-    @State private var text: String = "LumenOS 极简弹幕"
+    @State private var text: String = NSLocalizedString("default_barrage_text", comment: "")
     @State private var speed: Double = 5.0
     @State private var selectedColor: Color = .yellow
     @State private var isRGB: Bool = true
@@ -19,17 +19,25 @@ struct BarrageView: View {
     @State private var showPaywall = false
 
     let colors: [Color] = [.white, .yellow, .orange, .red, .pink, .purple, .blue, .green]
-    let presets = ["捞人", "打 Call", "生日快乐", " (｡♥‿♥｡) ", " ✺◟(∗❛ัᴗ❛ั∗)◞✺ ", "前方高能", "全军出击"]
+    let presets = [
+        NSLocalizedString("preset_pickup", comment: ""),
+        NSLocalizedString("preset_cheer", comment: ""),
+        NSLocalizedString("preset_birthday", comment: ""),
+        " (｡♥‿♥｡) ",
+        " ✺◟(∗❛ัᴗ❛ั∗)◞✺ ",
+        NSLocalizedString("preset_high_energy", comment: ""),
+        NSLocalizedString("preset_attack", comment: "")
+    ]
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // 1. 实时预览框 (Live Preview)
+                // 1. Live Preview
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text("实时预览")
+                        Text(NSLocalizedString("label_live_preview", comment: ""))
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.gray)
                         Spacer()
@@ -43,7 +51,7 @@ struct BarrageView: View {
                         }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "play.fill")
-                                Text("全屏展示")
+                                Text(NSLocalizedString("btn_full_screen", comment: ""))
                             }
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(.yellow)
@@ -56,12 +64,10 @@ struct BarrageView: View {
                     .padding(.horizontal)
 
                     ZStack {
-                        // 手机外框模型效果
                         RoundedRectangle(cornerRadius: 24)
                             .stroke(LinearGradient(colors: [Color(white: 0.3), Color(white: 0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 4)
                             .background(Color.black)
 
-                        // 预览核心内容
                         BarrageEngineView(
                             text: text,
                             speed: speed,
@@ -74,7 +80,6 @@ struct BarrageView: View {
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 20))
 
-                        // 灵动岛模拟
                         Capsule()
                             .fill(Color(white: 0.1))
                             .frame(width: 60, height: 18)
@@ -87,11 +92,11 @@ struct BarrageView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 25) {
-                        // 2. 文本输入区域
+                        // 2. Text Input
                         VStack(spacing: 12) {
                             HStack(spacing: 12) {
                                 ZStack(alignment: .trailing) {
-                                    TextField("", text: $text, prompt: Text("输入弹幕内容...").foregroundColor(.gray))
+                                    TextField("", text: $text, prompt: Text(NSLocalizedString("placeholder_input_barrage", comment: "")).foregroundColor(.gray))
                                         .padding(14)
                                         .background(Color(white: 0.12))
                                         .cornerRadius(12)
@@ -108,7 +113,7 @@ struct BarrageView: View {
                                 }
 
                                 Button(action: { isInputFocused = false }) {
-                                    Text("完成")
+                                    Text(NSLocalizedString("btn_done", comment: ""))
                                         .fontWeight(.bold)
                                         .foregroundColor(.yellow)
                                 }
@@ -131,9 +136,9 @@ struct BarrageView: View {
                             }
                         }
 
-                        // 3. 控制面板
+                        // 3. Control Panel
                         VStack(spacing: 25) {
-                            ControlSection(title: "滚动速度", icon: "speedometer") {
+                            ControlSection(title: NSLocalizedString("label_scroll_speed", comment: ""), icon: "speedometer") {
                                 HStack {
                                     Image(systemName: "tortoise.fill").foregroundColor(.gray)
                                     Slider(value: $speed, in: 1...10)
@@ -142,7 +147,7 @@ struct BarrageView: View {
                                 }
                             }
 
-                            ControlSection(title: "颜色 & 特效", icon: "paintbrush.fill") {
+                            ControlSection(title: NSLocalizedString("label_color_effect", comment: ""), icon: "paintbrush.fill") {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 15) {
                                         Button(action: { isRGB = true }) {
@@ -172,15 +177,15 @@ struct BarrageView: View {
                             }
 
                             HStack(spacing: 15) {
-                                ToggleCard(title: "LED 点阵", isOn: $isLED, icon: "grid")
-                                ToggleCard(title: "闪光联动", isOn: $isTorchSync, icon: "flashlight.on.fill")
+                                ToggleCard(title: NSLocalizedString("label_led_matrix", comment: ""), isOn: $isLED, icon: "grid")
+                                ToggleCard(title: NSLocalizedString("label_torch_sync", comment: ""), isOn: $isTorchSync, icon: "flashlight.on.fill")
                             }
 
-                            ControlSection(title: "动态背景", icon: "sparkles") {
+                            ControlSection(title: NSLocalizedString("label_dynamic_bg", comment: ""), icon: "sparkles") {
                                 HStack(spacing: 10) {
                                     ForEach([BarrageBGType.black, .hearts, .stars, .aurora], id: \.self) { type in
                                         Button(action: { bgType = type }) {
-                                            Text(type.rawValue)
+                                            Text(NSLocalizedString("bg_type_" + type.rawValue.lowercased(), comment: ""))
                                                 .font(.system(size: 13, weight: .medium))
                                                 .frame(maxWidth: .infinity)
                                                 .padding(.vertical, 12)
@@ -261,6 +266,12 @@ struct FullScreenBarrageView: View {
                 }
                 Spacer()
             }
+        }
+        .onAppear {
+            UIApplication.shared.isIdleTimerDisabled = true
+        }
+        .onDisappear {
+            UIApplication.shared.isIdleTimerDisabled = false
         }
         .statusBar(hidden: true)
     }
@@ -399,12 +410,12 @@ struct FallingHeartsAnimation: View {
     var body: some View {
         TimelineView(.animation) { timelineContext in
             let time = timelineContext.date.timeIntervalSinceReferenceDate
-            Canvas { context, size in
+            Canvas { gc, size in
                 for i in 0..<15 {
                     let seed = Double(i * 345)
                     let x = (sin(time + seed) * 0.4 + 0.5) * size.width
                     let y = ((time * 0.4 + seed).truncatingRemainder(dividingBy: 1.0)) * size.height
-                    context.draw(Text("❤️").font(.system(size: 24)), at: CGPoint(x: x, y: y))
+                    gc.draw(Text("❤️").font(.system(size: 24)), at: CGPoint(x: x, y: y))
                 }
             }
         }
@@ -415,12 +426,12 @@ struct TwinklingStarsAnimation: View {
     var body: some View {
         TimelineView(.animation) { timelineContext in
             let time = timelineContext.date.timeIntervalSinceReferenceDate
-            Canvas { context, size in
+            Canvas { gc, size in
                 for i in 0..<50 {
                     let x = Double((i * 789) % Int(size.width))
                     let y = Double((i * 123) % Int(size.height))
                     let opacity = 0.2 + 0.8 * abs(sin(time + Double(i)))
-                    context.fill(Path(ellipseIn: CGRect(x: x, y: y, width: 2, height: 2)), with: .color(.white.opacity(opacity)))
+                    gc.fill(Path(ellipseIn: CGRect(x: x, y: y, width: 2, height: 2)), with: .color(.white.opacity(opacity)))
                 }
             }
         }
@@ -439,10 +450,10 @@ struct AuroraGradientAnimation: View {
 // MARK: - Helper Components
 
 enum BarrageBGType: String {
-    case black = "纯黑"
-    case hearts = "浪漫爱心"
-    case stars = "璀璨星空"
-    case aurora = "幻彩极光"
+    case black = "black"
+    case hearts = "hearts"
+    case stars = "stars"
+    case aurora = "aurora"
 }
 
 struct ControlSection<Content: View>: View {

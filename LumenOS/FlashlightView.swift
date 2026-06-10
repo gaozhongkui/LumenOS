@@ -12,12 +12,12 @@ struct FlashlightView: View {
 
     var body: some View {
         ZStack {
-            // 背景深蓝黑色
+            // Background
             Color(red: 0.05, green: 0.07, blue: 0.12)
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // 顶部状态栏
+                // Top Bar
                 HStack {
                     Spacer()
                     Toggle("", isOn: $isOn)
@@ -35,6 +35,7 @@ struct FlashlightView: View {
                             } else {
                                 applyFlashlightChange(isOn: false)
                             }
+                            manager.triggerHapticFeedback()
                         }
                     Spacer()
                     HStack(spacing: 4) {
@@ -51,7 +52,7 @@ struct FlashlightView: View {
 
                 Spacer()
 
-                // 中央电源大按钮
+                // Center Power Button
                 ZStack {
                     if isOn {
                         Circle()
@@ -69,6 +70,7 @@ struct FlashlightView: View {
                     Button(action: {
                         if !isOn {
                             if subManager.canUseFlashlight() {
+                                subManager.recordFlashlightUsage()
                                 isOn = true
                             } else {
                                 showPaywall = true
@@ -77,61 +79,31 @@ struct FlashlightView: View {
                             isOn = false
                         }
                     }) {
-                        ZStack {
-                            Circle()
-                                .fill(LinearGradient(gradient: Gradient(colors: [Color(white: 0.2), Color(white: 0.1)]), startPoint: .top, endPoint: .bottom))
-                                .frame(width: 120, height: 120)
-                                .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 10)
-
-                            Circle()
-                                .stroke(isOn ? selectedColor.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 2)
-                                .frame(width: 100, height: 100)
-
-                            Image(systemName: "power")
-                                .font(.system(size: 40, weight: .light))
-                                .foregroundColor(isOn ? selectedColor : .gray)
-                        }
+                        PowerButtonUI(isOn: isOn, selectedColor: selectedColor)
                     }
                 }
                 .animation(.spring(), value: isOn)
 
                 Spacer()
 
-                // 底部控制面板
+                // Bottom Panel
                 HStack(alignment: .bottom) {
-                    // 1. 亮度调节条
+                    // 1. Intensity Bar
                     VStack(spacing: 5) {
                         Text("100%")
                             .font(.system(size: 10))
                             .foregroundColor(.gray)
 
-                        VStack(spacing: 3) {
-                            ForEach((0..<18).reversed(), id: \.self) { i in
-                                Rectangle()
-                                    .fill(CGFloat(i) / 18.0 < intensity ?
-                                          LinearGradient(gradient: Gradient(colors: [selectedColor, selectedColor.opacity(0.7)]), startPoint: .leading, endPoint: .trailing) :
-                                          LinearGradient(gradient: Gradient(colors: [Color(white: 0.15), Color(white: 0.1)]), startPoint: .leading, endPoint: .trailing))
-                                    .frame(width: 35, height: 6)
-                                    .cornerRadius(1)
-                            }
-                        }
-                        .padding(5)
-                        .background(Color.black.opacity(0.3))
-                        .cornerRadius(10)
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.1), lineWidth: 1))
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { value in
-                                    let barHeight: CGFloat = 170
-                                    let dragValue = 1.0 - (value.location.y / barHeight)
-                                    let newIntensity = max(0.01, min(dragValue, 1.0))
-                                    if abs(newIntensity - intensity) > 0.02 {
-                                        intensity = newIntensity
+                        IntensityBar(intensity: intensity, selectedColor: selectedColor)
+                            .gesture(
+                                DragGesture(minimumDistance: 0)
+                                    .onChanged { value in
+                                        let dragValue = 1.0 - (value.location.y / 170)
+                                        intensity = max(0.01, min(dragValue, 1.0))
                                         if isOn { manager.setIntensity(Float(intensity)) }
                                         manager.triggerSelectionFeedback()
                                     }
-                                }
-                        )
+                            )
 
                         Text("0%")
                             .font(.system(size: 10))
@@ -140,29 +112,25 @@ struct FlashlightView: View {
 
                     Spacer()
 
-                    // 2. 中间旋钮
+                    // 2. Mode Knob
                     VStack(spacing: 15) {
                         ZStack {
-                            // 模式标签位置
-                            ModeLabel(text: "SOS", angle: 0)
+                            // Mode Labels
+                            ModeLabel(text: NSLocalizedString("mode_sos", comment: ""), angle: 0)
                             ModeLabel(icon: "rays", angle: -45)
                             ModeLabel(icon: "antenna.radiowaves.left.and.right", angle: -90)
                             ModeLabel(icon: "speaker.slash.fill", angle: -135)
 
-                            ModeText(text: "Party Mode", angle: 45)
-                            ModeText(text: "Setc", angle: 90)
+                            ModeText(text: NSLocalizedString("mode_party", comment: ""), angle: 45)
+                            ModeText(text: NSLocalizedString("mode_setc", comment: ""), angle: 90)
 
-                            Circle()
-                                .fill(LinearGradient(gradient: Gradient(colors: [Color(white: 0.2), Color(white: 0.1)]), startPoint: .top, endPoint: .bottom))
-                                .frame(width: 110, height: 110)
-                                .shadow(radius: 10)
-                                .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
+                            KnobUI(rotation: rotation, selectedColor: selectedColor)
                                 .gesture(
                                     DragGesture()
                                         .onChanged { value in
                                             let vector = CGVector(dx: value.location.x - 55, dy: value.location.y - 55)
-                                            let angle = atan2(vector.dy, vector.dx)
-                                            rotation = angle * 180 / .pi + 90
+                                            rotation = atan2(vector.dy, vector.dx) * 180 / .pi + 90
+                                            updateMode()
                                             manager.triggerSelectionFeedback()
                                         }
                                 )
@@ -175,36 +143,16 @@ struct FlashlightView: View {
                         }
                         .frame(width: 160, height: 160)
 
-                        Text("Color")
+                        Text(NSLocalizedString("label_color", comment: ""))
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
                     }
 
                     Spacer()
 
-                    // 3. 颜色选择器
+                    // 3. Color Picker
                     VStack {
-                        ZStack {
-                            ColorPicker("", selection: $selectedColor)
-                                .labelsHidden()
-                                .scaleEffect(3)
-                                .frame(width: 44, height: 44)
-                                .mask(Circle())
-                                .zIndex(1)
-
-                            Circle()
-                                .fill(AngularGradient(gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple, .red]), center: .center))
-                                .frame(width: 44, height: 44)
-                                .overlay(
-                                    Circle()
-                                        .stroke(Color.white, lineWidth: 2)
-                                        .frame(width: 12, height: 12)
-                                        .offset(x: 10, y: 0)
-                                )
-                                .shadow(radius: 5)
-                                .allowsHitTesting(false)
-                                .zIndex(2)
-                        }
+                        ColorPickerUI(selectedColor: $selectedColor)
                         Spacer().frame(height: 25)
                     }
                 }
@@ -217,13 +165,75 @@ struct FlashlightView: View {
         }
     }
 
+    private func updateMode() {
+        if abs(rotation) < 20 { manager.currentMode = .sos }
+        else if rotation > -60 && rotation < -30 { manager.currentMode = .strobe }
+        else { manager.currentMode = .standard }
+        if isOn { manager.toggle(isOn: true, level: Float(intensity)) }
+    }
+
     private func applyFlashlightChange(isOn: Bool) {
         manager.toggle(isOn: isOn, level: Float(intensity))
         manager.triggerHapticFeedback()
     }
 }
 
-// 辅助组件
+// MARK: - UI Components
+
+struct PowerButtonUI: View {
+    let isOn: Bool
+    let selectedColor: Color
+    var body: some View {
+        ZStack {
+            Circle().fill(LinearGradient(gradient: Gradient(colors: [Color(white: 0.2), Color(white: 0.1)]), startPoint: .top, endPoint: .bottom))
+                .frame(width: 120, height: 120).shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 10)
+            Circle().stroke(isOn ? selectedColor.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 2)
+                .frame(width: 100, height: 100)
+            Image(systemName: "power").font(.system(size: 40, weight: .light)).foregroundColor(isOn ? selectedColor : .gray)
+        }
+    }
+}
+
+struct IntensityBar: View {
+    let intensity: CGFloat
+    let selectedColor: Color
+    var body: some View {
+        VStack(spacing: 3) {
+            ForEach((0..<18).reversed(), id: \.self) { i in
+                Rectangle()
+                    .fill(CGFloat(i) / 18.0 < intensity ? LinearGradient(colors: [selectedColor, selectedColor.opacity(0.7)], startPoint: .leading, endPoint: .trailing) : LinearGradient(colors: [Color(white: 0.15), Color(white: 0.1)], startPoint: .leading, endPoint: .trailing))
+                    .frame(width: 35, height: 6).cornerRadius(1)
+            }
+        }
+        .padding(5).background(Color.black.opacity(0.3)).cornerRadius(10)
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.1), lineWidth: 1))
+    }
+}
+
+struct KnobUI: View {
+    let rotation: Double
+    let selectedColor: Color
+    var body: some View {
+        ZStack {
+            Circle().fill(LinearGradient(colors: [Color(white: 0.2), Color(white: 0.1)], startPoint: .top, endPoint: .bottom))
+                .frame(width: 110, height: 110).shadow(radius: 10)
+            Circle().stroke(Color.white.opacity(0.1), lineWidth: 1)
+        }
+    }
+}
+
+struct ColorPickerUI: View {
+    @Binding var selectedColor: Color
+    var body: some View {
+        ZStack {
+            ColorPicker("", selection: $selectedColor).labelsHidden().scaleEffect(3).frame(width: 44, height: 44).mask(Circle()).zIndex(1)
+            Circle().fill(AngularGradient(gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple, .red]), center: .center))
+                .frame(width: 44, height: 44).overlay(Circle().stroke(Color.white, lineWidth: 2).frame(width: 12, height: 12).offset(x: 10, y: 0))
+                .shadow(radius: 5).allowsHitTesting(false).zIndex(2)
+        }
+    }
+}
+
 struct ModeLabel: View {
     var text: String? = nil
     var icon: String? = nil
@@ -233,10 +243,8 @@ struct ModeLabel: View {
             if let text = text { Text(text) }
             else if let icon = icon { Image(systemName: icon) }
         }
-        .font(.system(size: 10, weight: .medium))
-        .foregroundColor(.white.opacity(0.6))
-        .offset(y: -80)
-        .rotationEffect(.degrees(angle))
+        .font(.system(size: 10, weight: .medium)).foregroundColor(.white.opacity(0.6))
+        .offset(y: -80).rotationEffect(.degrees(angle))
     }
 }
 
@@ -244,31 +252,20 @@ struct ModeText: View {
     var text: String
     var angle: Double
     var body: some View {
-        Text(text)
-            .font(.system(size: 10, weight: .medium))
-            .foregroundColor(.white.opacity(0.6))
-            .offset(x: 75)
-            .rotationEffect(.degrees(angle - 90))
+        Text(text).font(.system(size: 10, weight: .medium)).foregroundColor(.white.opacity(0.6))
+            .offset(x: 75).rotationEffect(.degrees(angle - 90))
     }
 }
 
 struct CustomToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         Button(action: { configuration.isOn.toggle() }) {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(white: 0.15))
-                .frame(width: 50, height: 28)
-                .overlay(
-                    Circle()
-                        .fill(LinearGradient(gradient: Gradient(colors: [.yellow, .orange]), startPoint: .top, endPoint: .bottom))
-                        .padding(3)
-                        .offset(x: configuration.isOn ? 11 : -11)
-                )
+            RoundedRectangle(cornerRadius: 16).fill(Color(white: 0.15)).frame(width: 50, height: 28)
+                .overlay(Circle().fill(LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom)).padding(3).offset(x: configuration.isOn ? 11 : -11))
         }
     }
 }
 
-// 订阅页面组件
 struct SubscriptionPaywallView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var subManager = SubscriptionManager.shared
@@ -277,66 +274,36 @@ struct SubscriptionPaywallView: View {
     var body: some View {
         VStack(spacing: 30) {
             Spacer()
-
-            Image(systemName: "crown.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 100, height: 100)
-                .foregroundColor(.yellow)
-
+            Text("💎").font(.system(size: 80))
             VStack(spacing: 15) {
-                Text("开启无限可能")
-                    .font(.title)
-                    .fontWeight(.bold)
-
-                Text("您的免费使用次数已用完，订阅以继续享受手电筒、动态弹幕和所有高级功能。")
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.gray)
-                    .padding(.horizontal)
+                Text(NSLocalizedString("paywall_title_buyout", comment: "")).font(.title2.bold())
+                Text(NSLocalizedString("paywall_subtitle_buyout", comment: "")).multilineTextAlignment(.center).foregroundColor(.gray).padding(.horizontal)
             }
-
             VStack(spacing: 15) {
                 Button(action: {
                     Task {
                         isPurchasing = true
                         do {
                             try await subManager.purchase()
-                            if subManager.isSubscribed {
-                                dismiss()
-                            }
-                        } catch {
-                            print("Purchase failed: \(error)")
-                        }
+                            if subManager.isSubscribed { dismiss() }
+                        } catch { print("Purchase failed") }
                         isPurchasing = false
                     }
                 }) {
                     HStack {
-                        if isPurchasing {
-                            ProgressView().tint(.black).padding(.trailing, 5)
-                        }
-                        Text("立即订阅 - $0.99")
+                        if isPurchasing { ProgressView().tint(.black).padding(.trailing, 5) }
+                        Text(NSLocalizedString("btn_unlock_price", comment: ""))
                     }
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.yellow)
-                    .foregroundColor(.black)
-                    .cornerRadius(12)
+                    .fontWeight(.bold).frame(maxWidth: .infinity).padding().background(Color.yellow).foregroundColor(.black).cornerRadius(12)
                 }
                 .disabled(isPurchasing)
-
-                Button(action: { dismiss() }) {
-                    Text("暂不需要")
-                        .foregroundColor(.gray)
-                }
+                Button(NSLocalizedString("btn_restore_purchase", comment: "")) { Task { await subManager.updatePurchaseStatus() } }.foregroundColor(.yellow)
+                Button(NSLocalizedString("btn_not_now", comment: "")) { dismiss() }.foregroundColor(.gray)
             }
             .padding(.horizontal, 30)
-
             Spacer()
         }
-        .background(Color(red: 0.05, green: 0.07, blue: 0.12).ignoresSafeArea())
-        .preferredColorScheme(.dark)
+        .background(Color(red: 0.05, green: 0.07, blue: 0.12).ignoresSafeArea()).preferredColorScheme(.dark)
     }
 }
 

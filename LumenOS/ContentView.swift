@@ -7,19 +7,19 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             FlashlightView()
                 .tabItem {
-                    Label("手电筒", systemImage: "flashlight.on.fill")
+                    Label(NSLocalizedString("tab_flashlight", comment: ""), systemImage: "flashlight.on.fill")
                 }
                 .tag(0)
 
             BarrageView()
                 .tabItem {
-                    Label("弹幕", systemImage: "bubble.left.and.bubble.right.fill")
+                    Label(NSLocalizedString("tab_barrage", comment: ""), systemImage: "bubble.left.and.bubble.right.fill")
                 }
                 .tag(1)
 
             ProfileView()
                 .tabItem {
-                    Label("我的", systemImage: "person.fill")
+                    Label(NSLocalizedString("tab_profile", comment: ""), systemImage: "person.fill")
                 }
                 .tag(2)
         }
@@ -28,7 +28,6 @@ struct ContentView: View {
     }
 }
 
-// 完善后的“我的”页面
 struct ProfileView: View {
     @StateObject private var subManager = SubscriptionManager.shared
     @State private var showPaywall = false
@@ -36,7 +35,6 @@ struct ProfileView: View {
     var body: some View {
         NavigationView {
             List {
-                // 用户信息头部
                 Section {
                     HStack(spacing: 15) {
                         Image(systemName: "person.circle.fill")
@@ -45,60 +43,58 @@ struct ProfileView: View {
                             .foregroundColor(.gray)
 
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Lumen 用户")
-                                .font(.headline)
+                            HStack {
+                                Text(NSLocalizedString("user_name_default", comment: ""))
+                                    .font(.headline)
+                                if subManager.isSubscribed {
+                                    Text(NSLocalizedString("badge_pro", comment: ""))
+                                        .font(.system(size: 10, weight: .bold))
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.yellow)
+                                        .foregroundColor(.black)
+                                        .cornerRadius(4)
+                                }
+                            }
                             Text("ID: 88889999")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
-                        }
-
-                        Spacer()
-
-                        if subManager.isSubscribed {
-                            Text("PRO")
-                                .font(.system(size: 12, weight: .bold))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.yellow)
-                                .foregroundColor(.black)
-                                .cornerRadius(4)
                         }
                     }
                     .padding(.vertical, 8)
                 }
 
-                // 订阅状态及购买
-                Section(header: Text("账号状态")) {
+                Section(header: Text(NSLocalizedString("section_account_status", comment: ""))) {
                     HStack {
-                        Label("永久专业版", systemImage: "crown.fill")
+                        Label(NSLocalizedString("pro_status_title", comment: ""), systemImage: "crown.fill")
                             .foregroundColor(subManager.isSubscribed ? .yellow : .gray)
                         Spacer()
-                        Text(subManager.isSubscribed ? "已激活" : "未解锁")
+                        Text(subManager.isSubscribed ? NSLocalizedString("status_activated", comment: "") : NSLocalizedString("status_not_unlocked", comment: ""))
                             .foregroundColor(.gray)
                     }
 
                     if !subManager.isSubscribed {
                         Button(action: { showPaywall = true }) {
-                            Text("立即解锁专业版 ($0.99)")
+                            Text(NSLocalizedString("btn_unlock_pro", comment: ""))
                                 .foregroundColor(.yellow)
                                 .fontWeight(.bold)
                         }
                     } else {
                         HStack {
-                            Text("感谢支持！您已解锁所有功能")
+                            Text(NSLocalizedString("thanks_support", comment: ""))
                                 .font(.footnote)
                                 .foregroundColor(.gray)
                         }
                     }
                 }
 
-                Section(header: Text("法律信息")) {
-                    NavigationLink(destination: Text("隐私协议内容...")) {
-                        Label("隐私协议", systemImage: "shield.lefthalf.filled")
+                Section(header: Text(NSLocalizedString("section_legal", comment: ""))) {
+                    NavigationLink(destination: Text(NSLocalizedString("privacy_policy_content", comment: ""))) {
+                        Label(NSLocalizedString("privacy_policy", comment: ""), systemImage: "shield.lefthalf.filled")
                     }
 
-                    NavigationLink(destination: Text("服务条款内容...")) {
-                        Label("服务条款", systemImage: "doc.text")
+                    NavigationLink(destination: Text(NSLocalizedString("terms_of_service_content", comment: ""))) {
+                        Label(NSLocalizedString("terms_of_service", comment: ""), systemImage: "doc.text")
                     }
                 }
 
@@ -108,14 +104,14 @@ struct ProfileView: View {
                             await subManager.updatePurchaseStatus()
                         }
                     }) {
-                        Text("恢复购买")
+                        Text(NSLocalizedString("btn_restore_purchase", comment: ""))
                             .frame(maxWidth: .infinity)
                             .alignmentGuide(.leading) { _ in 0 }
                     }
                     .foregroundColor(.gray)
                 }
             }
-            .navigationTitle("我的")
+            .navigationTitle(NSLocalizedString("tab_profile", comment: ""))
             .sheet(isPresented: $showPaywall) {
                 SubscriptionPaywallView()
             }

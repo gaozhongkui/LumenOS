@@ -19,9 +19,9 @@ final class FlashlightManager: ObservableObject {
         case standard, sos, strobe
     }
 
-    /// 切换手电筒开关
+    /// Toggle flashlight switch
     func toggle(isOn: Bool, level: Float = 1.0) {
-        stopStrobe() // 切换时先停止所有循环逻辑
+        stopStrobe() // Stop all active strobe loops
 
         guard let device = device, device.hasTorch else { return }
 
@@ -32,7 +32,7 @@ final class FlashlightManager: ObservableObject {
                 case .standard:
                     try device.setTorchModeOn(level: max(0.001, min(level, 1.0)))
                 case .sos:
-                    device.unlockForConfiguration() // 先解锁让定时器能控制
+                    device.unlockForConfiguration() // Unlock for timer control
                     startSOS(level: level)
                     return
                 case .strobe:
@@ -45,21 +45,21 @@ final class FlashlightManager: ObservableObject {
             }
             device.unlockForConfiguration()
         } catch {
-            print("手电筒配置失败: \(error)")
+            print("Flashlight configuration failed: \(error)")
         }
     }
 
-    /// 调节亮度
+    /// Adjust intensity
     func setIntensity(_ level: Float) {
         guard let device = device, device.hasTorch, device.torchMode == .on else { return }
-        // 如果是 SOS 或 Strobe 模式，亮度会在下一次闪烁时生效
+        // In SOS/Strobe, intensity applies on next flash cycle
         if currentMode == .standard {
             do {
                 try device.lockForConfiguration()
                 try device.setTorchModeOn(level: max(0.001, min(level, 1.0)))
                 device.unlockForConfiguration()
             } catch {
-                print("亮度调节失败: \(error)")
+                print("Intensity adjustment failed: \(error)")
             }
         }
     }
@@ -110,7 +110,7 @@ final class FlashlightManager: ObservableObject {
         strobeTimer = nil
     }
 
-    /// 触感反馈
+    /// Haptic Feedback
     func triggerHapticFeedback() {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
     }
