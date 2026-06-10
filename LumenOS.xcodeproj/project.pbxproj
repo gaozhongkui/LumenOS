@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		05FA96322FD93840002C38ED /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05FA96312FD93840002C38ED /* StoreKit.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		05FA95432FD8FE86002C38ED /* LumenOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LumenOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		05FA96312FD93840002C38ED /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +28,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				05FA96322FD93840002C38ED /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +39,7 @@
 			isa = PBXGroup;
 			children = (
 				05FA95452FD8FE86002C38ED /* LumenOS */,
+				05FA96302FD93840002C38ED /* Frameworks */,
 				05FA95442FD8FE86002C38ED /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +50,14 @@
 				05FA95432FD8FE86002C38ED /* LumenOS.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		05FA96302FD93840002C38ED /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				05FA96312FD93840002C38ED /* StoreKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
