@@ -7,7 +7,7 @@ struct BarrageView: View {
     // Barrage Settings
     @State private var text: String = NSLocalizedString("default_barrage_text", comment: "")
     @State private var speed: Double = 5.0
-    @State private var selectedColor: Color = .yellow
+    @State private var selectedColor: Color = .l_gold
     @State private var isRGB: Bool = true
     @State private var isLED: Bool = false
     @State private var bgType: BarrageBGType = .black
@@ -18,7 +18,7 @@ struct BarrageView: View {
     @State private var showFullScreen: Bool = false
     @State private var showPaywall = false
 
-    let colors: [Color] = [.white, .yellow, .orange, .red, .pink, .purple, .blue, .green]
+    let colors: [Color] = [.white, .l_gold, .l_accent, .red, .pink, .purple, .blue, .green]
     let presets = [
         NSLocalizedString("preset_pickup", comment: ""),
         NSLocalizedString("preset_cheer", comment: ""),
@@ -31,7 +31,7 @@ struct BarrageView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.l_background.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // 1. Live Preview
@@ -54,10 +54,10 @@ struct BarrageView: View {
                                 Text(NSLocalizedString("btn_full_screen", comment: ""))
                             }
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.yellow)
+                            .foregroundColor(.black)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color.yellow.opacity(0.15))
+                            .background(Color.l_gold)
                             .cornerRadius(10)
                         }
                     }
@@ -65,7 +65,7 @@ struct BarrageView: View {
 
                     ZStack {
                         RoundedRectangle(cornerRadius: 24)
-                            .stroke(LinearGradient(colors: [Color(white: 0.3), Color(white: 0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 4)
+                            .stroke(LinearGradient(colors: [Color.white.opacity(0.2), Color.white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 2)
                             .background(Color.black)
 
                         BarrageEngineView(
@@ -94,11 +94,12 @@ struct BarrageView: View {
                     VStack(spacing: 25) {
                         // 2. Text Input
                         VStack(spacing: 12) {
+                            Spacer().frame(height: 1)
                             HStack(spacing: 12) {
                                 ZStack(alignment: .trailing) {
                                     TextField("", text: $text, prompt: Text(NSLocalizedString("placeholder_input_barrage", comment: "")).foregroundColor(.gray))
                                         .padding(14)
-                                        .background(Color(white: 0.12))
+                                        .background(Color.l_surface)
                                         .cornerRadius(12)
                                         .foregroundColor(.white)
                                         .focused($isInputFocused)
@@ -115,7 +116,7 @@ struct BarrageView: View {
                                 Button(action: { isInputFocused = false }) {
                                     Text(NSLocalizedString("btn_done", comment: ""))
                                         .fontWeight(.bold)
-                                        .foregroundColor(.yellow)
+                                        .foregroundColor(.l_gold)
                                 }
                             }
 
@@ -127,8 +128,8 @@ struct BarrageView: View {
                                                 .font(.system(size: 13))
                                                 .padding(.horizontal, 15)
                                                 .padding(.vertical, 8)
-                                                .background(Color.yellow.opacity(0.15))
-                                                .foregroundColor(.yellow)
+                                                .background(Color.l_gold.opacity(0.15))
+                                                .foregroundColor(.l_gold)
                                                 .cornerRadius(20)
                                         }
                                     }
@@ -142,7 +143,7 @@ struct BarrageView: View {
                                 HStack {
                                     Image(systemName: "tortoise.fill").foregroundColor(.gray)
                                     Slider(value: $speed, in: 1...10)
-                                        .accentColor(.yellow)
+                                        .accentColor(.l_gold)
                                     Image(systemName: "hare.fill").foregroundColor(.gray)
                                 }
                             }
@@ -189,7 +190,7 @@ struct BarrageView: View {
                                                 .font(.system(size: 13, weight: .medium))
                                                 .frame(maxWidth: .infinity)
                                                 .padding(.vertical, 12)
-                                                .background(bgType == type ? Color.yellow : Color(white: 0.15))
+                                                .background(bgType == type ? Color.l_gold : Color.l_surface)
                                                 .foregroundColor(bgType == type ? .black : .gray)
                                                 .cornerRadius(12)
                                         }
@@ -198,7 +199,7 @@ struct BarrageView: View {
                             }
                         }
                         .padding(20)
-                        .background(Color(white: 0.08))
+                        .background(Color.l_surface.opacity(0.5))
                         .cornerRadius(24)
                     }
                     .padding(.horizontal)
@@ -492,7 +493,7 @@ struct ToggleCard: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)
-            .background(isOn ? Color.yellow : Color(white: 0.15))
+            .background(isOn ? Color.l_gold : Color.l_surface)
             .foregroundColor(isOn ? .black : .white)
             .cornerRadius(16)
         }

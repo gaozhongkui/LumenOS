@@ -15,18 +15,12 @@ struct SplashScreenView: View {
 
                 VStack {
                     VStack(spacing: 20) {
-                        ZStack {
-                            // 外围光晕
-                            Circle()
-                                .fill(Color.yellow.opacity(0.2))
-                                .frame(width: 120, height: 120)
-                                .blur(radius: 20)
-
-                            Image(systemName: "flashlight.on.fill")
-                                .font(.system(size: 80))
-                                .foregroundColor(.yellow)
-                                .shadow(color: .yellow.opacity(0.5), radius: 10)
-                        }
+                        Image("splash_icon")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 100, height: 100)
+                            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                            .shadow(color: .yellow.opacity(0.3), radius: 20)
 
                         Text("LumenOS")
                             .font(.system(size: 40, weight: .black, design: .rounded))

@@ -7,13 +7,13 @@ struct FlashlightView: View {
     @State private var isOn = false
     @State private var intensity: CGFloat = 0.6
     @State private var rotation: Double = 0
-    @State private var selectedColor: Color = .yellow
+    @State private var selectedColor: Color = .l_gold
     @State private var showPaywall = false
 
     var body: some View {
         ZStack {
             // Background
-            Color(red: 0.05, green: 0.07, blue: 0.12)
+            Color.l_background
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -250,7 +250,7 @@ struct ModeItem: View {
         ZStack {
             // Dot on dashed circle
             Circle()
-                .fill(isSelected ? .yellow : Color.white.opacity(0.4))
+                .fill(isSelected ? Color.l_gold : Color.white.opacity(0.4))
                 .frame(width: 4, height: 4)
                 .offset(y: -70)
                 .rotationEffect(.degrees(angle))
@@ -264,7 +264,7 @@ struct ModeItem: View {
                 }
             }
             .font(.system(size: 10, weight: isSelected ? .bold : .medium))
-            .foregroundColor(isSelected ? .yellow : .white.opacity(0.6))
+            .foregroundColor(isSelected ? Color.l_gold : .white.opacity(0.6))
             .rotationEffect(.degrees(-angle)) // Counter-rotate to stay upright
             .offset(y: -85)
             .rotationEffect(.degrees(angle))
@@ -293,8 +293,8 @@ struct ColorPickerUI: View {
 struct CustomToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         Button(action: { configuration.isOn.toggle() }) {
-            RoundedRectangle(cornerRadius: 16).fill(Color(white: 0.15)).frame(width: 50, height: 28)
-                .overlay(Circle().fill(LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom)).padding(3).offset(x: configuration.isOn ? 11 : -11))
+            RoundedRectangle(cornerRadius: 16).fill(Color.l_surface).frame(width: 50, height: 28)
+                .overlay(Circle().fill(LinearGradient(colors: [.l_gold, .l_accent], startPoint: .top, endPoint: .bottom)).padding(3).offset(x: configuration.isOn ? 11 : -11))
         }
     }
 }
@@ -327,16 +327,16 @@ struct SubscriptionPaywallView: View {
                         if isPurchasing { ProgressView().tint(.black).padding(.trailing, 5) }
                         Text(NSLocalizedString("btn_unlock_price", comment: ""))
                     }
-                    .fontWeight(.bold).frame(maxWidth: .infinity).padding().background(Color.yellow).foregroundColor(.black).cornerRadius(12)
+                    .fontWeight(.bold).frame(maxWidth: .infinity).padding().background(Color.l_gold).foregroundColor(.black).cornerRadius(12)
                 }
                 .disabled(isPurchasing)
-                Button(NSLocalizedString("btn_restore_purchase", comment: "")) { Task { await subManager.updatePurchaseStatus() } }.foregroundColor(.yellow)
+                Button(NSLocalizedString("btn_restore_purchase", comment: "")) { Task { await subManager.updatePurchaseStatus() } }.foregroundColor(.l_gold)
                 Button(NSLocalizedString("btn_not_now", comment: "")) { dismiss() }.foregroundColor(.gray)
             }
             .padding(.horizontal, 30)
             Spacer()
         }
-        .background(Color(red: 0.05, green: 0.07, blue: 0.12).ignoresSafeArea()).preferredColorScheme(.dark)
+        .background(Color.l_background.ignoresSafeArea()).preferredColorScheme(.dark)
     }
 }
 
