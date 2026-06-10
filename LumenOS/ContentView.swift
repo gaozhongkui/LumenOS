@@ -16,13 +16,13 @@ struct ContentView: View {
                 }
                 .tag(0)
 
-            Text("弹幕界面")
+            BarrageView()
                 .tabItem {
                     Label("弹幕", systemImage: "bubble.left.and.bubble.right.fill")
                 }
                 .tag(1)
 
-            Text("我的")
+            ProfileView()
                 .tabItem {
                     Label("我的", systemImage: "person.fill")
                 }
@@ -30,6 +30,39 @@ struct ContentView: View {
         }
         .accentColor(.yellow)
         .preferredColorScheme(.dark)
+    }
+}
+
+// 简单的“我的”页面
+struct ProfileView: View {
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    HStack {
+                        Image(systemName: "person.circle.fill")
+                            .resizable()
+                            .frame(width: 60, height: 60)
+                            .foregroundColor(.gray)
+                        VStack(alignment: .leading) {
+                            Text("Lumen 用户")
+                                .font(.headline)
+                            Text("ID: 12345678")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+
+                Section(header: Text("常用功能")) {
+                    Label("设置", systemImage: "gear")
+                    Label("意见反馈", systemImage: "envelope")
+                    Label("关于我们", systemImage: "info.circle")
+                }
+            }
+            .navigationTitle("我的")
+        }
     }
 }
 
