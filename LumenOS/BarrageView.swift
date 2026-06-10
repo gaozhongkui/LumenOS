@@ -212,7 +212,6 @@ struct BarrageView: View {
             }
         }
         .onChange(of: themeManager.selectedTheme) { newTheme in
-            // 如果用户没手动选过颜色，跟随主题更新默认色
             selectedColor = newTheme.primary
         }
         .onTapGesture { isInputFocused = false }
@@ -281,6 +280,10 @@ struct FullScreenBarrageView: View {
         }
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
+            // 确保退出时关闭同步灯光
+            if isTorchSync {
+                FlashlightManager.shared.toggle(isOn: false)
+            }
         }
         .statusBar(hidden: true)
     }
@@ -367,8 +370,9 @@ struct MarqueeCore: View {
             .offset(x: xOffset, y: (containerSize.height - baseFontSize) / 2)
             .onChange(of: timelineContext.date) { date in
                 if isTorchSync {
+                    // 使用优化后的同步接口，减少配置锁定开销
                     let strobe = Int(time * speed * 2) % 2 == 0
-                    manager.toggle(isOn: strobe, level: 0.3)
+                    manager.setTorchSync(isOn: strobe)
                 }
             }
         }
@@ -507,8 +511,4 @@ struct ToggleCard: View {
             .cornerRadius(16)
         }
     }
-}
-
-#Preview {
-    BarrageView().environmentObject(ThemeManager.shared)
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 struct FlashlightView: View {
     @EnvironmentObject var themeManager: ThemeManager
@@ -312,8 +313,12 @@ struct SubscriptionPaywallView: View {
             Spacer()
             Text("💎").font(.system(size: 80))
             VStack(spacing: 15) {
-                Text(NSLocalizedString("paywall_title_buyout", comment: "")).font(.title2.bold())
-                Text(NSLocalizedString("paywall_subtitle_buyout", comment: "")).multilineTextAlignment(.center).foregroundColor(.gray).padding(.horizontal)
+                Text(NSLocalizedString("paywall_title_buyout", comment: ""))
+                    .font(.title2.bold())
+                Text(NSLocalizedString("paywall_subtitle_buyout", comment: ""))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal)
             }
             VStack(spacing: 15) {
                 Button(action: {
@@ -322,23 +327,49 @@ struct SubscriptionPaywallView: View {
                         do {
                             try await subManager.purchase()
                             if subManager.isSubscribed { dismiss() }
-                        } catch { print("Purchase failed") }
+                        } catch {
+                            print("Purchase failed: \(error)")
+                        }
                         isPurchasing = false
                     }
                 }) {
                     HStack {
                         if isPurchasing { ProgressView().tint(.black).padding(.trailing, 5) }
-                        Text(NSLocalizedString("btn_unlock_price", comment: ""))
+                        Text(subManager.products.first?.displayPrice ?? NSLocalizedString("btn_unlock_price", comment: ""))
                     }
-                    .fontWeight(.bold).frame(maxWidth: .infinity).padding().background(themeManager.selectedTheme.primary).foregroundColor(.black).cornerRadius(12)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(themeManager.selectedTheme.primary)
+                    .foregroundColor(.black)
+                    .cornerRadius(12)
                 }
                 .disabled(isPurchasing)
-                Button(NSLocalizedString("btn_restore_purchase", comment: "")) { Task { await subManager.updatePurchaseStatus() } }.foregroundColor(themeManager.selectedTheme.primary)
-                Button(NSLocalizedString("btn_not_now", comment: "")) { dismiss() }.foregroundColor(.gray)
+
+                Button(NSLocalizedString("btn_restore_purchase", comment: "")) {
+                    Task { await subManager.restore() }
+                }
+                .foregroundColor(themeManager.selectedTheme.primary)
+
+                Button(NSLocalizedString("btn_not_now", comment: "")) {
+                    dismiss()
+                }
+                .foregroundColor(.gray)
             }
             .padding(.horizontal, 30)
+
             Spacer()
+
+            // Legal Links (App Store Requirement)
+            HStack(spacing: 25) {
+                Link(NSLocalizedString("privacy_policy", comment: ""), destination: URL(string: "https://your-privacy-policy-link.com")!)
+                Link(NSLocalizedString("terms_of_service", comment: ""), destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+            }
+            .font(.caption)
+            .foregroundColor(.gray)
+            .padding(.bottom, 20)
         }
-        .background(themeManager.selectedTheme.background.ignoresSafeArea()).preferredColorScheme(.dark)
+        .background(themeManager.selectedTheme.background.ignoresSafeArea())
+        .preferredColorScheme(.dark)
     }
 }

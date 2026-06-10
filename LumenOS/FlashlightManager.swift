@@ -20,7 +20,7 @@ final class FlashlightManager: ObservableObject {
         case standard, sos, strobe
     }
 
-    /// Toggle flashlight switch
+    /// Toggle flashlight switch with full logic (stops timers)
     func toggle(isOn: Bool, level: Float = 1.0) {
         self.intensity = level
         stopStrobe()
@@ -51,74 +51,58 @@ final class FlashlightManager: ObservableObject {
         }
     }
 
-    /// Adjust intensity
+    /// Lightweight torch control for sync features
+    func setTorchSync(isOn: Bool, level: Float = 0.3) {
+        setTorchInternal(isOn: isOn, level: level)
+    }
+
+    /// Adjust intensity immediately
     func setIntensity(_ level: Float) {
         self.intensity = level
         guard let device = device, device.hasTorch, device.torchMode == .on else { return }
 
-        // Only update immediately if in standard mode to avoid interrupting strobe/SOS cycles
         if currentMode == .standard {
-            do {
-                try device.lockForConfiguration()
-                try device.setTorchModeOn(level: max(0.001, min(level, 1.0)))
-                device.unlockForConfiguration()
-            } catch {
-                print("Intensity adjustment failed: \(error)")
-            }
+            setTorchInternal(isOn: true, level: level)
         }
     }
 
-    // MARK: - Strobe Logic
+    // MARK: - Strobe & SOS Logic
 
     private func startStrobe() {
         var flashOn = false
         strobeTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             flashOn.toggle()
-            self.setTorch(isOn: flashOn)
+            self.setTorchInternal(isOn: flashOn)
         }
     }
 
     private func startSOS() {
         let sosPattern: [TimeInterval] = [0.2, 0.2, 0.2, 0.2, 0.2, 0.6, 0.6, 0.2, 0.6, 0.2, 0.6, 0.6, 0.2, 0.2, 0.2, 0.2, 0.2, 1.0]
         var index = 0
+        strobeTimer = Timer()
 
-        func runNext() {
+        func runSOSStep() {
             guard strobeTimer != nil else { return }
             let isOn = index % 2 == 0
-            self.setTorch(isOn: isOn)
-
+            self.setTorchInternal(isOn: isOn)
             let delay = sosPattern[index % sosPattern.count]
-            index += 1
+            index = (index + 1) % sosPattern.count
 
-            strobeTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
-                self?.runNext()
+            // Corrected: Capture the local function directly
+            strobeTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { _ in
+                runSOSStep()
             }
         }
-
-        // Initial call
-        let isOn = index % 2 == 0
-        self.setTorch(isOn: isOn)
-        let delay = sosPattern[0]
-        index += 1
-        strobeTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
-            self?.runNext()
-        }
+        runSOSStep()
     }
 
-    private func runNext() {
-        // Helper for SOS recursive timer
-        let sosPattern: [TimeInterval] = [0.2, 0.2, 0.2, 0.2, 0.2, 0.6, 0.6, 0.2, 0.6, 0.2, 0.6, 0.6, 0.2, 0.2, 0.2, 0.2, 0.2, 1.0]
-        // This is a bit messy, but serves the purpose for now.
-        // In a real app, a more robust state machine would be better.
-    }
-
-    private func setTorch(isOn: Bool) {
+    private func setTorchInternal(isOn: Bool, level: Float? = nil) {
         guard let device = device, device.hasTorch else { return }
         do {
             try device.lockForConfiguration()
             if isOn {
-                try device.setTorchModeOn(level: max(0.001, min(self.intensity, 1.0)))
+                try device.setTorchModeOn(level: max(0.001, min(level ?? self.intensity, 1.0)))
             } else {
                 device.torchMode = .off
             }
@@ -126,12 +110,12 @@ final class FlashlightManager: ObservableObject {
         } catch { }
     }
 
-    private func stopStrobe() {
+    func stopStrobe() {
         strobeTimer?.invalidate()
         strobeTimer = nil
+        setTorchInternal(isOn: false)
     }
 
-    /// Haptic Feedback
     func triggerHapticFeedback() {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
     }
