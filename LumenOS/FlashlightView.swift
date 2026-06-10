@@ -1,24 +1,31 @@
 import SwiftUI
 
 struct FlashlightView: View {
+    // 引入手电筒管理器
+    @StateObject private var manager = FlashlightManager.shared
+
     @State private var isOn = false
     @State private var intensity: CGFloat = 0.6
     @State private var rotation: Double = 0
-    @State private var selectedMode: String = "SOS"
 
     var body: some View {
         ZStack {
-            // Background
+            // 背景
             Color(red: 0.05, green: 0.07, blue: 0.12)
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {
-                // Top Bar
+                // 顶部状态栏
                 HStack {
                     Spacer()
                     Toggle("", isOn: $isOn)
                         .toggleStyle(CustomToggleStyle())
                         .frame(width: 60)
+                        .onChange(of: isOn) { newValue in
+                            // 同步硬件开关
+                            manager.toggle(isOn: newValue, level: Float(intensity))
+                            manager.triggerHapticFeedback()
+                        }
                     Spacer()
                     HStack(spacing: 4) {
                         Image(systemName: "thermometer.medium")
@@ -34,22 +41,27 @@ struct FlashlightView: View {
 
                 Spacer()
 
-                // Central Power Button
+                // 中央电源大按钮
                 ZStack {
-                    // Glow effect
-                    Circle()
-                        .fill(RadialGradient(gradient: Gradient(colors: [Color.yellow.opacity(0.3), Color.clear]), center: .center, startRadius: 50, endRadius: 150))
-                        .frame(width: 300, height: 300)
+                    // 开启时的光晕效果 (随亮度变化)
+                    if isOn {
+                        Circle()
+                            .fill(RadialGradient(gradient: Gradient(colors: [Color.yellow.opacity(0.4 * intensity), Color.clear]), center: .center, startRadius: 50, endRadius: 150))
+                            .frame(width: 300, height: 300)
+                            .transition(.opacity.animation(.easeInOut))
+                    }
 
-                    // Ripple rings
+                    // 装饰性波纹圆环
                     ForEach(0..<3) { i in
                         Circle()
-                            .stroke(Color.yellow.opacity(0.2), lineWidth: 1)
+                            .stroke(isOn ? Color.yellow.opacity(0.2) : Color.white.opacity(0.05), lineWidth: 1)
                             .frame(width: CGFloat(140 + i * 40), height: CGFloat(140 + i * 40))
                     }
 
-                    // Main Button
-                    Button(action: { isOn.toggle() }) {
+                    // 主电源按钮
+                    Button(action: {
+                        isOn.toggle()
+                    }) {
                         ZStack {
                             Circle()
                                 .fill(LinearGradient(gradient: Gradient(colors: [Color(white: 0.2), Color(white: 0.1)]), startPoint: .top, endPoint: .bottom))
@@ -57,7 +69,7 @@ struct FlashlightView: View {
                                 .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 10)
 
                             Circle()
-                                .stroke(Color.yellow.opacity(0.5), lineWidth: 2)
+                                .stroke(isOn ? Color.yellow.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 2)
                                 .frame(width: 100, height: 100)
 
                             Image(systemName: "power")
@@ -66,12 +78,13 @@ struct FlashlightView: View {
                         }
                     }
                 }
+                .animation(.spring(), value: isOn)
 
                 Spacer()
 
-                // Bottom Controls
+                // 底部控制面板
                 HStack(alignment: .bottom, spacing: 30) {
-                    // Intensity Vertical Bar
+                    // 亮度调节条 (左侧)
                     VStack(spacing: 5) {
                         Text("100%")
                             .font(.system(size: 10))
@@ -91,16 +104,32 @@ struct FlashlightView: View {
                         .background(Color.black.opacity(0.3))
                         .cornerRadius(8)
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.3), lineWidth: 1))
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    let barHeight: CGFloat = 160 // 容器大概高度
+                                    let dragValue = 1.0 - (value.location.y / barHeight)
+                                    let newIntensity = max(0.01, min(dragValue, 1.0))
+
+                                    if abs(newIntensity - intensity) > 0.02 {
+                                        intensity = newIntensity
+                                        if isOn {
+                                            manager.setIntensity(Float(intensity))
+                                        }
+                                        manager.triggerSelectionFeedback()
+                                    }
+                                }
+                        )
 
                         Text("0%")
                             .font(.system(size: 10))
                             .foregroundColor(.gray)
                     }
 
-                    // Rotary Dial
+                    // 模式切换旋钮 (中间)
                     VStack {
                         ZStack {
-                            // Mode Icons/Labels around the dial
+                            // 环绕模式标签
                             ModeLabel(text: "SOS", angle: -30)
                             ModeLabel(icon: "rays", angle: -70)
                             ModeLabel(icon: "antenna.radiowaves.left.and.right", angle: -110)
@@ -109,17 +138,24 @@ struct FlashlightView: View {
                             ModeText(text: "Party Mode", angle: 40)
                             ModeText(text: "Setc", angle: 70)
 
-                            // The Knob
+                            // 旋钮主体与旋转手势
                             Circle()
                                 .fill(LinearGradient(gradient: Gradient(colors: [Color(white: 0.2), Color(white: 0.1)]), startPoint: .top, endPoint: .bottom))
                                 .frame(width: 120, height: 120)
                                 .shadow(radius: 5)
-                                .overlay(
-                                    Circle()
-                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                .overlay(Circle().stroke(Color.gray.opacity(0.3), lineWidth: 1))
+                                .gesture(
+                                    DragGesture()
+                                        .onChanged { value in
+                                            let vector = CGVector(dx: value.location.x - 60, dy: value.location.y - 60)
+                                            let angle = atan2(vector.dy, vector.dx)
+                                            let degrees = angle * 180 / .pi
+                                            rotation = degrees + 90 // 修正起始角度
+                                            manager.triggerSelectionFeedback()
+                                        }
                                 )
 
-                            // Indicator line on knob
+                            // 旋钮指示器
                             Rectangle()
                                 .fill(Color.yellow)
                                 .frame(width: 2, height: 15)
@@ -133,7 +169,7 @@ struct FlashlightView: View {
                             .foregroundColor(.gray)
                     }
 
-                    // Color Picker Button
+                    // 颜色选择预览 (右侧)
                     VStack {
                         Circle()
                             .fill(AngularGradient(gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple, .red]), center: .center))
@@ -155,6 +191,7 @@ struct FlashlightView: View {
     }
 }
 
+// 辅助组件保持不变
 struct ModeLabel: View {
     var text: String? = nil
     var icon: String? = nil
