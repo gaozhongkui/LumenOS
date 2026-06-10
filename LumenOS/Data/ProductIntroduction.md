@@ -36,3 +36,8 @@ Unlock the PRO version to enjoy:
 **Support Contact: hhyteam@zhongkuitech.cn**
 
 **LumenOS - Illuminating Your World.**
+
+
+
+Privacy Policy:https://docs.google.com/document/d/e/2PACX-1vRQgj2bHW_bPvVIPPRJWeeCknPYo5TqWBM9UPqjRuizwK98fxFZ1wl7H1mYUgnwzc45Zh5Glvc8igZI/pub
+Terms of Service：https://docs.google.com/document/d/e/2PACX-1vRulMM4KmyJvKzz9zaTQECGJJESVmFN-h7F-ke5tst4qYDWzGpYGAVy0fBJXlQifLgSSRxZxyI5r7Zk/pub
