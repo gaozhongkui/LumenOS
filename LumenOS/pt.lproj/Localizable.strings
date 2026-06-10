@@ -7,7 +7,7 @@
 "pro_status_title" = "Status PRO Vitalício";
 "status_activated" = "Ativado";
 "status_not_unlocked" = "Não Desbloqueado";
-"btn_unlock_pro" = "Desbloquear PRO para Sempre ($0.99)";
+"btn_unlock_pro" = "Desbloquear PRO para Sempre ($1.99)";
 "thanks_support" = "Obrigado pelo seu apoio! Todos os recursos desbloqueados.";
 "section_legal" = "Informações Legais";
 "privacy_policy" = "Política de Privacidade";
@@ -21,7 +21,7 @@
 "label_color" = "Cor";
 "paywall_title_buyout" = "Desbloquear Pro para Sempre";
 "paywall_subtitle_buyout" = "Pague uma vez, aproveite lanterna, barragem e efeitos especiais ilimitados para sempre.";
-"btn_unlock_price" = "Desbloquear Agora - $0.99";
+"btn_unlock_price" = "Desbloquear Agora - $1.99";
 "btn_not_now" = "Agora não";
 "label_live_preview" = "Visualização ao Vivo";
 "btn_full_screen" = "Tela Cheia";

@@ -7,7 +7,7 @@
 "pro_status_title" = "حالة PRO مدى الحياة";
 "status_activated" = "مفعل";
 "status_not_unlocked" = "غير مفتوح";
-"btn_unlock_pro" = "فتح PRO للأبد ($0.99)";
+"btn_unlock_pro" = "فتح PRO للأبد ($1.99)";
 "thanks_support" = "شكراً لدعمك! تم فتح جميع الميزات.";
 "section_legal" = "معلومات قانونية";
 "privacy_policy" = "سياسة الخصوصية";
@@ -21,9 +21,9 @@
 "label_color" = "اللون";
 "paywall_title_buyout" = "فتح Pro للأبد";
 "paywall_subtitle_buyout" = "ادفع مرة واحدة، واستمتع بمصباح يدوي ونصوص متحركة وتأثيرات خاصة غير محدودة للأبد.";
-"btn_unlock_price" = "فتح الآن - $0.99";
+"btn_unlock_price" = "فتح الآن - $1.99";
 "btn_not_now" = "ليس الآن";
-"label_live_preview" = "معاينة مباشرة";
+"label_live_preview" = "معaينة مباشرة";
 "btn_full_screen" = "شاشة كاملة";
 "placeholder_input_barrage" = "أدخل نص المتحرك...";
 "btn_done" = "تم";

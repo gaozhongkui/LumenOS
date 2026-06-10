@@ -7,7 +7,7 @@
 "pro_status_title" = "無期限 PRO ステータス";
 "status_activated" = "有効";
 "status_not_unlocked" = "未解放";
-"btn_unlock_pro" = "無期限に PRO を解放 ($0.99)";
+"btn_unlock_pro" = "無期限に PRO を解放 ($1.99)";
 "thanks_support" = "ご支援ありがとうございます！すべての機能が解放されました。";
 "section_legal" = "法的情報";
 "privacy_policy" = "プライバシーポリシー";
@@ -21,7 +21,7 @@
 "label_color" = "カラー";
 "paywall_title_buyout" = "Pro を無期限で解放";
 "paywall_subtitle_buyout" = "一度の支払いで、懐中電灯、弾幕、特殊効果を無制限に永久に利用できます。";
-"btn_unlock_price" = "今すぐ解放 - $0.99";
+"btn_unlock_price" = "今すぐ解放 - $1.99";
 "btn_not_now" = "今はしない";
 "label_live_preview" = "ライブプレビュー";
 "btn_full_screen" = "全画面表示";

@@ -7,7 +7,7 @@
 "pro_status_title" = "Stato PRO a vita";
 "status_activated" = "Attivato";
 "status_not_unlocked" = "Non sbloccato";
-"btn_unlock_pro" = "Sblocca PRO per sempre ($0.99)";
+"btn_unlock_pro" = "Sblocca PRO per sempre ($1.99)";
 "thanks_support" = "Grazie per il tuo supporto! Tutte le funzioni sbloccate.";
 "section_legal" = "Informazioni legali";
 "privacy_policy" = "Informativa sulla privacy";
@@ -21,7 +21,7 @@
 "label_color" = "Colore";
 "paywall_title_buyout" = "Sblocca Pro per sempre";
 "paywall_subtitle_buyout" = "Paga una volta, goditi torcia, barrage ed effetti speciali illimitati per sempre.";
-"btn_unlock_price" = "Sblocca ora - $0.99";
+"btn_unlock_price" = "Sblocca ora - $1.99";
 "btn_not_now" = "Non ora";
 "label_live_preview" = "Anteprima dal vivo";
 "btn_full_screen" = "Schermo intero";

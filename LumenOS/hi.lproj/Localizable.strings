@@ -7,7 +7,7 @@
 "pro_status_title" = "लाइफटाइम PRO स्थिति";
 "status_activated" = "सक्रिय";
 "status_not_unlocked" = "अनलॉक नहीं किया गया";
-"btn_unlock_pro" = "PRO हमेशा के लिए अनलॉक करें ($0.99)";
+"btn_unlock_pro" = "PRO हमेशा के लिए अनलॉक करें ($1.99)";
 "thanks_support" = "आपके समर्थन के लिए धन्यवाद! सभी सुविधाएँ अनलॉक हैं।";
 "section_legal" = "कानूनी जानकारी";
 "privacy_policy" = "गोपनीयता नीति";
@@ -21,7 +21,7 @@
 "label_color" = "रंग";
 "paywall_title_buyout" = "Pro हमेशा के लिए अनलॉक करें";
 "paywall_subtitle_buyout" = "एक बार भुगतान करें, हमेशा के लिए असीमित टॉर्च, बैराज और विशेष प्रभावों का आनंद लें।";
-"btn_unlock_price" = "अभी अनलॉक करें - $0.99";
+"btn_unlock_price" = "अभी अनलॉक करें - $1.99";
 "btn_not_now" = "अभी नहीं";
 "label_live_preview" = "लाइव पूर्वावलोकन";
 "btn_full_screen" = "पूर्ण स्क्रीन";
@@ -38,7 +38,7 @@
 "label_torch_sync" = "टॉर्च सिंक";
 "label_dynamic_bg" = "गतिशील पृष्ठभूमि";
 "bg_type_black" = "शुद्ध काला";
-"bg_type_hearts" = "रोमांटिक दिल";
+"bg_type_hearts" = "रोماंटिक दिल";
 "bg_type_stars" = "टिमटिमाते सितारे";
 "bg_type_aurora" = "ध्रुवीय ज्योति";
 "default_barrage_text" = "लुमेनओएस बैराज";

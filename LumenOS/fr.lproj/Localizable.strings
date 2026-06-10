@@ -7,7 +7,7 @@
 "pro_status_title" = "Statut PRO à vie";
 "status_activated" = "Activé";
 "status_not_unlocked" = "Non déverrouillé";
-"btn_unlock_pro" = "Déverrouiller PRO pour toujours (0,99 $)";
+"btn_unlock_pro" = "Déverrouiller PRO pour toujours (1,99 $)";
 "thanks_support" = "Merci pour votre soutien ! Toutes les fonctionnalités sont déverrouillées.";
 "section_legal" = "Informations légales";
 "privacy_policy" = "Politique de confidentialité";
@@ -21,7 +21,7 @@
 "label_color" = "Couleur";
 "paywall_title_buyout" = "Déverrouiller Pro pour toujours";
 "paywall_subtitle_buyout" = "Payez une seule fois, profitez de la lampe, du barrage et des effets spéciaux en illimité pour toujours.";
-"btn_unlock_price" = "Déverrouiller maintenant - 0,99 $";
+"btn_unlock_price" = "Déverrouiller maintenant - 1,99 $";
 "btn_not_now" = "Pas maintenant";
 "label_live_preview" = "Aperçu en direct";
 "btn_full_screen" = "Plein écran";

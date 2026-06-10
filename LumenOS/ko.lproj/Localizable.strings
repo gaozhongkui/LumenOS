@@ -7,7 +7,7 @@
 "pro_status_title" = "평생 PRO 상태";
 "status_activated" = "활성화됨";
 "status_not_unlocked" = "잠금 해제되지 않음";
-"btn_unlock_pro" = "PRO 평생 잠금 해제 ($0.99)";
+"btn_unlock_pro" = "PRO 평생 잠금 해제 ($1.99)";
 "thanks_support" = "응원해 주셔서 감사합니다! 모든 기능이 잠금 해제되었습니다.";
 "section_legal" = "법적 정보";
 "privacy_policy" = "개인정보 처리방침";
@@ -21,7 +21,7 @@
 "label_color" = "색상";
 "paywall_title_buyout" = "Pro 평생 잠금 해제";
 "paywall_subtitle_buyout" = "한 번 결제로 손전등, 전광판 및 특수 효과를 평생 무제한으로 즐기세요.";
-"btn_unlock_price" = "지금 잠금 해제 - $0.99";
+"btn_unlock_price" = "지금 잠금 해제 - $1.99";
 "btn_not_now" = "나중에";
 "label_live_preview" = "실시간 미리보기";
 "btn_full_screen" = "전체 화면";

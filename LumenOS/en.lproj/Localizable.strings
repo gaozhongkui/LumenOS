@@ -7,7 +7,7 @@
 "pro_status_title" = "Lifetime PRO Status";
 "status_activated" = "Activated";
 "status_not_unlocked" = "Not Unlocked";
-"btn_unlock_pro" = "Unlock PRO Forever ($0.99)";
+"btn_unlock_pro" = "Unlock PRO Forever ($1.99)";
 "thanks_support" = "Thanks for your support! All features unlocked.";
 "section_legal" = "Legal Information";
 "privacy_policy" = "Privacy Policy";
@@ -21,7 +21,7 @@
 "label_color" = "Color";
 "paywall_title_buyout" = "Unlock Pro Forever";
 "paywall_subtitle_buyout" = "Pay once, enjoy unlimited flashlight, barrage, and special effects forever.";
-"btn_unlock_price" = "Unlock Now - $0.99";
+"btn_unlock_price" = "Unlock Now - $1.99";
 "btn_not_now" = "Not Now";
 "label_live_preview" = "Live Preview";
 "btn_full_screen" = "Full Screen";

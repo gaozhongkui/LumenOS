@@ -7,7 +7,7 @@
 "pro_status_title" = "Lebenslanger PRO-Status";
 "status_activated" = "Aktiviert";
 "status_not_unlocked" = "Nicht freigeschaltet";
-"btn_unlock_pro" = "PRO dauerhaft freischalten ($0.99)";
+"btn_unlock_pro" = "PRO dauerhaft freischalten ($1.99)";
 "thanks_support" = "Vielen Dank für Ihre Unterstützung! Alle Funktionen freigeschaltet.";
 "section_legal" = "Rechtliche Informationen";
 "privacy_policy" = "Datenschutzrichtlinie";
@@ -21,7 +21,7 @@
 "label_color" = "Farbe";
 "paywall_title_buyout" = "Pro dauerhaft freischalten";
 "paywall_subtitle_buyout" = "Einmal zahlen, unbegrenzt Taschenlampe, Laufschrift und Spezialeffekte genießen.";
-"btn_unlock_price" = "Jetzt freischalten - $0.99";
+"btn_unlock_price" = "Jetzt freischalten - $1.99";
 "btn_not_now" = "Nicht jetzt";
 "label_live_preview" = "Live-Vorschau";
 "btn_full_screen" = "Vollbild";
