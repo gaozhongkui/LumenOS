@@ -45,3 +45,9 @@
 "bg_type_stars" = "Étoiles scintillantes";
 "bg_type_aurora" = "Aurore boréale";
 "default_barrage_text" = "LumenOS Barrage";
+
+"section_app_skin" = "Thème de l'app";
+"product_info" = "Info produit";
+"alert_purchase_failed_title" = "Achat échoué";
+"alert_purchase_failed_message" = "Une erreur s'est produite lors du traitement de votre achat. Veuillez réessayer.";
+"btn_ok" = "OK";

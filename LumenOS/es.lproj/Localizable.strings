@@ -45,3 +45,9 @@
 "bg_type_stars" = "Estrellas parpadeantes";
 "bg_type_aurora" = "Aurora boreal";
 "default_barrage_text" = "Barrage LumenOS";
+
+"section_app_skin" = "Tema de la app";
+"product_info" = "Info del producto";
+"alert_purchase_failed_title" = "Compra fallida";
+"alert_purchase_failed_message" = "Ocurrió un error al procesar tu compra. Por favor, inténtalo de nuevo.";
+"btn_ok" = "OK";

@@ -45,3 +45,9 @@
 "bg_type_stars" = "نجوم متلألئة";
 "bg_type_aurora" = "أورورا";
 "default_barrage_text" = "LumenOS نص متحرك";
+
+"section_app_skin" = "سمة التطبيق";
+"product_info" = "معلومات المنتج";
+"alert_purchase_failed_title" = "فشل الشراء";
+"alert_purchase_failed_message" = "حدث خطأ أثناء معالجة عملية الشراء. يرجى المحاولة مرة أخرى.";
+"btn_ok" = "حسناً";

@@ -45,3 +45,9 @@
 "bg_type_stars" = "टिमटिमाते सितारे";
 "bg_type_aurora" = "ध्रुवीय ज्योति";
 "default_barrage_text" = "लुमेनओएस बैराज";
+
+"section_app_skin" = "ऐप थीम";
+"product_info" = "उत्पाद जानकारी";
+"alert_purchase_failed_title" = "खरीदारी विफल";
+"alert_purchase_failed_message" = "आपकी खरीदारी प्रक्रिया में त्रुटि आई। कृपया पुनः प्रयास करें।";
+"btn_ok" = "ठीक है";

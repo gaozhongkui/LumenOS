@@ -11,6 +11,9 @@ struct FlashlightView: View {
     @State private var rotation: Double = 0
     @State private var selectedColor: Color = .l_gold
     @State private var showPaywall = false
+    @State private var batteryLevel: Float = 0
+    @State private var batteryState: UIDevice.BatteryState = .unknown
+    @State private var thermalState: ProcessInfo.ThermalState = .nominal
 
     var body: some View {
         ZStack {
@@ -41,10 +44,15 @@ struct FlashlightView: View {
                         }
                     Spacer()
                     HStack(spacing: 4) {
-                        Image(systemName: "thermometer.medium")
-                        Text("27°")
-                        Image(systemName: "battery.75")
-                            .foregroundColor(.green)
+                        Image(systemName: thermalIconName)
+                            .foregroundColor(thermalColor)
+                        Image(systemName: batteryIconName)
+                            .foregroundColor(batteryColor)
+                        if batteryState == .charging || batteryState == .full {
+                            Image(systemName: "bolt.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(.yellow)
+                        }
                     }
                     .font(.system(size: 14))
                     .foregroundColor(.white)
@@ -173,8 +181,61 @@ struct FlashlightView: View {
                 selectedColor = newTheme.primary
             }
         }
+        .onAppear {
+            UIDevice.current.isBatteryMonitoringEnabled = true
+            batteryLevel = UIDevice.current.batteryLevel
+            batteryState = UIDevice.current.batteryState
+            thermalState = ProcessInfo.processInfo.thermalState
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIDevice.batteryLevelDidChangeNotification)) { _ in
+            batteryLevel = UIDevice.current.batteryLevel
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIDevice.batteryStateDidChangeNotification)) { _ in
+            batteryState = UIDevice.current.batteryState
+        }
+        .onReceive(NotificationCenter.default.publisher(for: ProcessInfo.thermalStateDidChangeNotification)) { _ in
+            thermalState = ProcessInfo.processInfo.thermalState
+        }
         .sheet(isPresented: $showPaywall) {
             SubscriptionPaywallView()
+        }
+    }
+
+    private var batteryIconName: String {
+        if batteryState == .charging || batteryState == .full {
+            return "battery.100.bolt"
+        }
+        switch batteryLevel {
+        case 0.75...: return "battery.100"
+        case 0.50...: return "battery.75"
+        case 0.25...: return "battery.50"
+        case 0.10...: return "battery.25"
+        default:      return "battery.0"
+        }
+    }
+
+    private var batteryColor: Color {
+        if batteryState == .charging || batteryState == .full { return .green }
+        if batteryLevel <= 0.10 { return .red }
+        if batteryLevel <= 0.25 { return .yellow }
+        return .white
+    }
+
+    private var thermalIconName: String {
+        switch thermalState {
+        case .serious:  return "thermometer.high"
+        case .critical: return "thermometer.sun.fill"
+        default:        return "thermometer.medium"
+        }
+    }
+
+    private var thermalColor: Color {
+        switch thermalState {
+        case .nominal:  return .white.opacity(0.6)
+        case .fair:     return .yellow
+        case .serious:  return .orange
+        case .critical: return .red
+        @unknown default: return .white.opacity(0.6)
         }
     }
 
@@ -320,6 +381,7 @@ struct SubscriptionPaywallView: View {
     @StateObject private var subManager = SubscriptionManager.shared
     @State private var isPurchasing = false
     @State private var webURL: URL? = nil
+    @State private var purchaseErrorMessage: String? = nil
 
     var body: some View {
         VStack(spacing: 30) {
@@ -341,7 +403,7 @@ struct SubscriptionPaywallView: View {
                             try await subManager.purchase()
                             if subManager.isSubscribed { dismiss() }
                         } catch {
-                            print("Purchase failed: \(error)")
+                            purchaseErrorMessage = error.localizedDescription
                         }
                         isPurchasing = false
                     }
@@ -390,6 +452,14 @@ struct SubscriptionPaywallView: View {
         .preferredColorScheme(.dark)
         .sheet(item: $webURL) { url in
             WebBrowserView(title: url.host ?? "", url: url)
+        }
+        .alert(NSLocalizedString("alert_purchase_failed_title", comment: ""), isPresented: Binding(
+            get: { purchaseErrorMessage != nil },
+            set: { if !$0 { purchaseErrorMessage = nil } }
+        )) {
+            Button(NSLocalizedString("btn_ok", comment: ""), role: .cancel) {}
+        } message: {
+            Text(purchaseErrorMessage ?? "")
         }
     }
 }

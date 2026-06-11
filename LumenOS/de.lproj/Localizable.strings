@@ -45,3 +45,9 @@
 "bg_type_stars" = "Funkelnde Sterne";
 "bg_type_aurora" = "Polarlicht";
 "default_barrage_text" = "LumenOS Laufschrift";
+
+"section_app_skin" = "App-Design";
+"product_info" = "Produktinfo";
+"alert_purchase_failed_title" = "Kauf fehlgeschlagen";
+"alert_purchase_failed_message" = "Beim Kauf ist ein Fehler aufgetreten. Bitte versuche es erneut.";
+"btn_ok" = "OK";

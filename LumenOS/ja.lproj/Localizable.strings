@@ -45,3 +45,9 @@
 "bg_type_stars" = "輝く星空";
 "bg_type_aurora" = "オーロラ";
 "default_barrage_text" = "LumenOS 弾幕";
+
+"section_app_skin" = "アプリテーマ";
+"product_info" = "製品情報";
+"alert_purchase_failed_title" = "購入失敗";
+"alert_purchase_failed_message" = "購入処理中にエラーが発生しました。もう一度お試しください。";
+"btn_ok" = "OK";

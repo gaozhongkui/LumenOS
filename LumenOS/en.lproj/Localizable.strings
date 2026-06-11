@@ -45,3 +45,9 @@
 "bg_type_stars" = "Twinkling Stars";
 "bg_type_aurora" = "Aurora Borealis";
 "default_barrage_text" = "LumenOS Barrage";
+
+"section_app_skin" = "APP SKIN";
+"product_info" = "Product Info";
+"alert_purchase_failed_title" = "Purchase Failed";
+"alert_purchase_failed_message" = "An error occurred while processing your purchase. Please try again.";
+"btn_ok" = "OK";

@@ -76,7 +76,9 @@ struct ProfileView: View {
                                             .cornerRadius(4)
                                     }
                                 }
-                                Text("ID: 88889999")
+                                Text(subManager.isSubscribed
+                                     ? NSLocalizedString("status_activated", comment: "")
+                                     : NSLocalizedString("status_not_unlocked", comment: ""))
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
                             }
@@ -86,7 +88,7 @@ struct ProfileView: View {
                     .listRowBackground(themeManager.selectedTheme.surface)
 
                     // MARK: - Skin Selection Section
-                    Section(header: Text("APP SKIN").foregroundColor(.gray)) {
+                    Section(header: Text(NSLocalizedString("section_app_skin", comment: "")).foregroundColor(.gray)) {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 15) {
                                 ForEach(AppTheme.allCases) { theme in
@@ -153,7 +155,7 @@ struct ProfileView: View {
                         Button {
                             webURL = URL(string: "https://gaozhongkui.github.io/zhongkuitech/LumenOS/")
                         } label: {
-                            Label("Product Info", systemImage: "info.circle")
+                            Label(NSLocalizedString("product_info", comment: ""), systemImage: "info.circle")
                         }
 
                         Button {
