@@ -440,10 +440,10 @@ struct SubscriptionPaywallView: View {
             // Legal Links
             HStack(spacing: 25) {
                 Button(NSLocalizedString("privacy_policy", comment: "")) {
-                    webURL = URL(string: "https://docs.google.com/document/d/e/2PACX-1vRQgj2bHW_bPvVIPPRJWeeCknPYo5TqWBM9UPqjRuizwK98fxFZ1wl7H1mYUgnwzc45Zh5Glvc8igZI/pub")
+                    webURL = URL(string: "https://sites.google.com/view/lumenos-privacy-policy")
                 }
                 Button(NSLocalizedString("terms_of_service", comment: "")) {
-                    webURL = URL(string: "https://docs.google.com/document/d/e/2PACX-1vRulMM4KmyJvKzz9zaTQECGJJESVmFN-h7F-ke5tst4qYDWzGpYGAVy0fBJXlQifLgSSRxZxyI5r7Zk/pub")
+                    webURL = URL(string: "https://sites.google.com/view/lumenos-terms-of-service")
                 }
             }
             .font(.caption)
