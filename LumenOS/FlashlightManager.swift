@@ -9,6 +9,7 @@ final class FlashlightManager: ObservableObject {
     private var device: AVCaptureDevice?
     private var strobeTimer: Timer?
     private var sosIndex = 0
+    private let flashlightQueue = DispatchQueue(label: "com.lumenos.flashlight", qos: .userInteractive)
 
     @Published var currentMode: FlashlightMode = .standard
     @Published var intensity: Float = 0.6
@@ -43,10 +44,13 @@ final class FlashlightManager: ObservableObject {
             return
         }
 
-        // If already on and mode hasn't changed, we might not want to reset timers.
-        // But usually, updateMode calls this when a change IS detected.
-
         restartCurrentMode()
+    }
+
+    /// Lightweight toggle for synchronization features (e.g. Barrage)
+    /// Skips timer management and mode logic for performance.
+    func toggleSync(isOn: Bool) {
+        setTorchInternal(isOn: isOn)
     }
 
     func restartCurrentMode() {
@@ -112,17 +116,27 @@ final class FlashlightManager: ObservableObject {
     }
 
     private func setTorchInternal(isOn: Bool, level: Float? = nil) {
-        guard let device = device, device.hasTorch else { return }
-        do {
-            try device.lockForConfiguration()
-            if isOn {
-                let targetLevel = max(0.001, min(level ?? self.intensity, 1.0))
-                try device.setTorchModeOn(level: targetLevel)
-            } else {
-                device.torchMode = .off
+        flashlightQueue.async { [weak self] in
+            guard let self = self, let device = self.device, device.hasTorch else { return }
+
+            let targetMode: AVCaptureDevice.TorchMode = isOn ? .on : .off
+
+            // Optimization: Only apply if mode changes, or if turning on (to ensure level is set correctly)
+            if device.torchMode == targetMode && !isOn {
+                return
             }
-            device.unlockForConfiguration()
-        } catch { }
+
+            do {
+                try device.lockForConfiguration()
+                if isOn {
+                    let targetLevel = max(0.001, min(level ?? self.intensity, 1.0))
+                    try device.setTorchModeOn(level: targetLevel)
+                } else {
+                    device.torchMode = .off
+                }
+                device.unlockForConfiguration()
+            } catch { }
+        }
     }
 
     func stopStrobe() {

@@ -8,7 +8,7 @@ struct FlashlightView: View {
 
     @State private var isOn = false
     @State private var intensity: CGFloat = 0.6
-    @State private var rotation: Double = 0
+    @State private var rotation: Double = 90
     @State private var selectedColor: Color = .l_gold
     @State private var showPaywall = false
     @State private var batteryLevel: Float = -1

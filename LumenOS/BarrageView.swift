@@ -347,6 +347,7 @@ struct MarqueeCore: View {
     let isFullScreen: Bool
 
     @StateObject private var manager = FlashlightManager.shared
+    @State private var lastStrobe: Bool? = nil
 
     var body: some View {
         TimelineView(.animation) { (timelineContext: TimelineViewDefaultContext) in
@@ -382,7 +383,10 @@ struct MarqueeCore: View {
             .onChange(of: timelineContext.date) { _ in
                 if isTorchSync {
                     let strobe = Int(time * speed * 2) % 2 == 0
-                    manager.toggle(isOn: strobe)
+                    if strobe != lastStrobe {
+                        lastStrobe = strobe
+                        manager.toggleSync(isOn: strobe)
+                    }
                 }
             }
         }
