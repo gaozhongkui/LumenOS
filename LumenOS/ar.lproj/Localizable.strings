@@ -17,7 +17,10 @@
 "btn_restore_purchase" = "استعادة المشتريات";
 "mode_sos" = "SOS";
 "mode_party" = "وضع الحفلة";
-"mode_setc" = "إعدادات";
+"mode_strobe" = "وميض سريع";
+"mode_pulse" = "نبضة";
+"mode_silent" = "صامت";
+"mode_setc" = "ثابت";
 "label_color" = "اللون";
 "paywall_title_buyout" = "فتح Pro للأبد";
 "paywall_subtitle_buyout" = "ادفع مرة واحدة، واستمتع بمصباح يدوي ونصوص متحركة وتأثيرات خاصة غير محدودة للأبد.";

@@ -17,7 +17,10 @@
 "btn_restore_purchase" = "Restaurer l'achat";
 "mode_sos" = "SOS";
 "mode_party" = "Mode Fête";
-"mode_setc" = "Réglages";
+"mode_strobe" = "Stroboscope";
+"mode_pulse" = "Pulse";
+"mode_silent" = "Silencieux";
+"mode_setc" = "Continu";
 "label_color" = "Couleur";
 "paywall_title_buyout" = "Déverrouiller Pro pour toujours";
 "paywall_subtitle_buyout" = "Payez une seule fois, profitez de la lampe, du barrage et des effets spéciaux en illimité pour toujours.";

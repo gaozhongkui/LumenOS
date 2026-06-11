@@ -17,7 +17,10 @@
 "btn_restore_purchase" = "購入を復元";
 "mode_sos" = "SOS";
 "mode_party" = "パーティーモード";
-"mode_setc" = "設定";
+"mode_strobe" = "ストロボ";
+"mode_pulse" = "パルス";
+"mode_silent" = "サイレント";
+"mode_setc" = "常灯";
 "label_color" = "カラー";
 "paywall_title_buyout" = "Pro を無期限で解放";
 "paywall_subtitle_buyout" = "一度の支払いで、懐中電灯、弾幕、特殊効果を無制限に永久に利用できます。";

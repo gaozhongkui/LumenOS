@@ -17,7 +17,10 @@
 "btn_restore_purchase" = "Restaurar Compra";
 "mode_sos" = "SOS";
 "mode_party" = "Modo Festa";
-"mode_setc" = "Configurações";
+"mode_strobe" = "Estroboscópio";
+"mode_pulse" = "Pulso";
+"mode_silent" = "Silencioso";
+"mode_setc" = "Constante";
 "label_color" = "Cor";
 "paywall_title_buyout" = "Desbloquear Pro para Sempre";
 "paywall_subtitle_buyout" = "Pague uma vez, aproveite lanterna, barragem e efeitos especiais ilimitados para sempre.";

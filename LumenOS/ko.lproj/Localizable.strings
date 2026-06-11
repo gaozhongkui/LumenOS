@@ -17,7 +17,10 @@
 "btn_restore_purchase" = "구매 복원";
 "mode_sos" = "SOS";
 "mode_party" = "파티 모드";
-"mode_setc" = "설정";
+"mode_strobe" = "스트로브";
+"mode_pulse" = "펄스";
+"mode_silent" = "무음";
+"mode_setc" = "상시 점등";
 "label_color" = "색상";
 "paywall_title_buyout" = "Pro 평생 잠금 해제";
 "paywall_subtitle_buyout" = "한 번 결제로 손전등, 전광판 및 특수 효과를 평생 무제한으로 즐기세요.";

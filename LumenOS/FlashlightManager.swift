@@ -19,6 +19,17 @@ final class FlashlightManager: ObservableObject {
 
     enum FlashlightMode: String, CaseIterable {
         case standard, sos, strobe, party, pulse, silent
+
+        var displayName: String {
+            switch self {
+            case .standard: return NSLocalizedString("mode_setc", comment: "")
+            case .sos:      return NSLocalizedString("mode_sos", comment: "")
+            case .strobe:   return NSLocalizedString("mode_strobe", comment: "")
+            case .party:    return NSLocalizedString("mode_party", comment: "")
+            case .pulse:    return NSLocalizedString("mode_pulse", comment: "")
+            case .silent:   return NSLocalizedString("mode_silent", comment: "")
+            }
+        }
     }
 
     /// Toggle flashlight switch with full logic

@@ -17,7 +17,10 @@
 "btn_restore_purchase" = "Kauf wiederherstellen";
 "mode_sos" = "SOS";
 "mode_party" = "Partymodus";
-"mode_setc" = "Einstellungen";
+"mode_strobe" = "Blitz";
+"mode_pulse" = "Puls";
+"mode_silent" = "Stumm";
+"mode_setc" = "Dauerlicht";
 "label_color" = "Farbe";
 "paywall_title_buyout" = "Pro dauerhaft freischalten";
 "paywall_subtitle_buyout" = "Einmal zahlen, unbegrenzt Taschenlampe, Laufschrift und Spezialeffekte genießen.";

@@ -124,9 +124,9 @@ struct FlashlightView: View {
 
                             // Mode Items (Dots and Labels)
                             ModeItem(text: NSLocalizedString("mode_sos", comment: ""), angle: 0, currentRotation: rotation)
-                            ModeItem(icon: "rays", angle: -45, currentRotation: rotation)
-                            ModeItem(icon: "antenna.radiowaves.left.and.right", angle: -90, currentRotation: rotation)
-                            ModeItem(icon: "speaker.slash.fill", angle: -135, currentRotation: rotation)
+                            ModeItem(text: NSLocalizedString("mode_strobe", comment: ""), angle: -45, currentRotation: rotation)
+                            ModeItem(text: NSLocalizedString("mode_pulse", comment: ""), angle: -90, currentRotation: rotation)
+                            ModeItem(text: NSLocalizedString("mode_silent", comment: ""), angle: -135, currentRotation: rotation)
                             ModeItem(text: NSLocalizedString("mode_party", comment: ""), angle: 45, currentRotation: rotation)
                             ModeItem(text: NSLocalizedString("mode_setc", comment: ""), angle: 90, currentRotation: rotation)
 
@@ -150,9 +150,10 @@ struct FlashlightView: View {
                         }
                         .frame(width: 180, height: 180)
 
-                        Text(NSLocalizedString("label_color", comment: ""))
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                        Text(manager.currentMode.displayName)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(selectedColor)
+                            .animation(.easeInOut(duration: 0.2), value: manager.currentMode)
                     }
 
                     Spacer()
@@ -181,9 +182,7 @@ struct FlashlightView: View {
         let r = rotation.truncatingRemainder(dividingBy: 360)
         let normalized = r < -180 ? r + 360 : (r > 180 ? r - 360 : r)
 
-        let oldMode = manager.currentMode
-        var newMode: FlashlightManager.FlashlightMode = .standard
-
+        let newMode: FlashlightManager.FlashlightMode?
         if abs(normalized - 0) < 15 {
             newMode = .sos
         } else if abs(normalized - (-45)) < 15 {
@@ -197,14 +196,13 @@ struct FlashlightView: View {
         } else if abs(normalized - 90) < 15 {
             newMode = .standard
         } else {
-            newMode = .standard
+            newMode = nil  // between positions: keep current mode
         }
 
-        if newMode != oldMode {
-            manager.currentMode = newMode
-            if isOn {
-                manager.restartCurrentMode()
-            }
+        guard let newMode, newMode != manager.currentMode else { return }
+        manager.currentMode = newMode
+        if isOn {
+            manager.restartCurrentMode()
         }
     }
 }

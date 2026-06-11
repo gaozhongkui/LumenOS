@@ -17,7 +17,10 @@
 "btn_restore_purchase" = "Ripristina acquisto";
 "mode_sos" = "SOS";
 "mode_party" = "Modalità Party";
-"mode_setc" = "Impostazioni";
+"mode_strobe" = "Strobo";
+"mode_pulse" = "Pulsante";
+"mode_silent" = "Silenzioso";
+"mode_setc" = "Continuo";
 "label_color" = "Colore";
 "paywall_title_buyout" = "Sblocca Pro per sempre";
 "paywall_subtitle_buyout" = "Paga una volta, goditi torcia, barrage ed effetti speciali illimitati per sempre.";

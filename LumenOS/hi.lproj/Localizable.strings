@@ -17,7 +17,10 @@
 "btn_restore_purchase" = "खरीद पुनर्स्थापित करें";
 "mode_sos" = "SOS";
 "mode_party" = "पार्टी मोड";
-"mode_setc" = "सेटअप";
+"mode_strobe" = "स्ट्रोब";
+"mode_pulse" = "पल्स";
+"mode_silent" = "साइलेंट";
+"mode_setc" = "स्थिर";
 "label_color" = "रंग";
 "paywall_title_buyout" = "Pro हमेशा के लिए अनलॉक करें";
 "paywall_subtitle_buyout" = "एक बार भुगतान करें, हमेशा के लिए असीमित टॉर्च, बैराज और विशेष प्रभावों का आनंद लें।";
