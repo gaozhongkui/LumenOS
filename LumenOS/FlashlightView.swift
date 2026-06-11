@@ -29,13 +29,13 @@ struct FlashlightView: View {
                             if newValue {
                                 if subManager.canUseFlashlight() {
                                     subManager.recordFlashlightUsage()
-                                    applyFlashlightChange(isOn: true)
+                                    manager.toggle(isOn: true, level: Float(intensity))
                                 } else {
                                     isOn = false
                                     showPaywall = true
                                 }
                             } else {
-                                applyFlashlightChange(isOn: false)
+                                manager.toggle(isOn: false)
                             }
                             manager.triggerHapticFeedback()
                         }
@@ -168,7 +168,6 @@ struct FlashlightView: View {
             }
         }
         .onChange(of: themeManager.selectedTheme) { newTheme in
-            // 当用户更换皮肤时，如果灯没开，自动将选色设为皮肤主色
             if !isOn {
                 selectedColor = newTheme.primary
             }
@@ -182,20 +181,35 @@ struct FlashlightView: View {
         let r = rotation.truncatingRemainder(dividingBy: 360)
         let normalized = r < -180 ? r + 360 : (r > 180 ? r - 360 : r)
 
-        if abs(normalized) < 20 { manager.currentMode = .sos }
-        else if normalized > -60 && normalized < -30 { manager.currentMode = .strobe }
-        else { manager.currentMode = .standard }
+        let oldMode = manager.currentMode
+        var newMode: FlashlightManager.FlashlightMode = .standard
 
-        if isOn { manager.toggle(isOn: true, level: Float(intensity)) }
-    }
+        if abs(normalized - 0) < 15 {
+            newMode = .sos
+        } else if abs(normalized - (-45)) < 15 {
+            newMode = .strobe
+        } else if abs(normalized - (-90)) < 15 {
+            newMode = .pulse
+        } else if abs(normalized - (-135)) < 15 {
+            newMode = .silent
+        } else if abs(normalized - 45) < 15 {
+            newMode = .party
+        } else if abs(normalized - 90) < 15 {
+            newMode = .standard
+        } else {
+            newMode = .standard
+        }
 
-    private func applyFlashlightChange(isOn: Bool) {
-        manager.toggle(isOn: isOn, level: Float(intensity))
-        manager.triggerHapticFeedback()
+        if newMode != oldMode {
+            manager.currentMode = newMode
+            if isOn {
+                manager.restartCurrentMode()
+            }
+        }
     }
 }
 
-// MARK: - UI Components (Updated with Theme Support)
+// MARK: - UI Components
 
 struct PowerButtonUI: View {
     let isOn: Bool
@@ -307,6 +321,7 @@ struct SubscriptionPaywallView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var subManager = SubscriptionManager.shared
     @State private var isPurchasing = false
+    @State private var webURL: URL? = nil
 
     var body: some View {
         VStack(spacing: 30) {
@@ -360,10 +375,14 @@ struct SubscriptionPaywallView: View {
 
             Spacer()
 
-            // Legal Links (App Store Requirement)
+            // Legal Links
             HStack(spacing: 25) {
-                Link(NSLocalizedString("privacy_policy", comment: ""), destination: URL(string: "https://your-privacy-policy-link.com")!)
-                Link(NSLocalizedString("terms_of_service", comment: ""), destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                Button(NSLocalizedString("privacy_policy", comment: "")) {
+                    webURL = URL(string: "https://docs.google.com/document/d/e/2PACX-1vRQgj2bHW_bPvVIPPRJWeeCknPYo5TqWBM9UPqjRuizwK98fxFZ1wl7H1mYUgnwzc45Zh5Glvc8igZI/pub")
+                }
+                Button(NSLocalizedString("terms_of_service", comment: "")) {
+                    webURL = URL(string: "https://docs.google.com/document/d/e/2PACX-1vRulMM4KmyJvKzz9zaTQECGJJESVmFN-h7F-ke5tst4qYDWzGpYGAVy0fBJXlQifLgSSRxZxyI5r7Zk/pub")
+                }
             }
             .font(.caption)
             .foregroundColor(.gray)
@@ -371,5 +390,8 @@ struct SubscriptionPaywallView: View {
         }
         .background(themeManager.selectedTheme.background.ignoresSafeArea())
         .preferredColorScheme(.dark)
+        .sheet(item: $webURL) { url in
+            WebBrowserView(title: url.host ?? "", url: url)
+        }
     }
 }

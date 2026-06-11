@@ -39,32 +39,13 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Document View
-struct DocumentView: View {
-    @EnvironmentObject var themeManager: ThemeManager
-    let title: String
-    let content: String
 
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 15) {
-                Text(content)
-                    .font(.body)
-                    .lineSpacing(6)
-                    .foregroundColor(.white.opacity(0.9))
-            }
-            .padding(20)
-        }
-        .background(themeManager.selectedTheme.background.ignoresSafeArea())
-        .navigationTitle(title)
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
 
 struct ProfileView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var subManager = SubscriptionManager.shared
     @State private var showPaywall = false
+    @State private var webURL: URL? = nil
 
     var body: some View {
         NavigationView {
@@ -169,15 +150,21 @@ struct ProfileView: View {
 
                     // Legal & Info
                     Section(header: Text(NSLocalizedString("section_legal", comment: "")).foregroundColor(.gray)) {
-                        NavigationLink(destination: DocumentView(title: "Product Info", content: productIntroText)) {
+                        Button {
+                            webURL = URL(string: "https://gaozhongkui.github.io/zhongkuitech/LumenOS/")
+                        } label: {
                             Label("Product Info", systemImage: "info.circle")
                         }
 
-                        NavigationLink(destination: DocumentView(title: NSLocalizedString("privacy_policy", comment: ""), content: privacyPolicyText)) {
+                        Button {
+                            webURL = URL(string: "https://docs.google.com/document/d/e/2PACX-1vRQgj2bHW_bPvVIPPRJWeeCknPYo5TqWBM9UPqjRuizwK98fxFZ1wl7H1mYUgnwzc45Zh5Glvc8igZI/pub")
+                        } label: {
                             Label(NSLocalizedString("privacy_policy", comment: ""), systemImage: "shield.lefthalf.filled")
                         }
 
-                        NavigationLink(destination: DocumentView(title: NSLocalizedString("terms_of_service", comment: ""), content: termsOfServiceText)) {
+                        Button {
+                            webURL = URL(string: "https://docs.google.com/document/d/e/2PACX-1vRulMM4KmyJvKzz9zaTQECGJJESVmFN-h7F-ke5tst4qYDWzGpYGAVy0fBJXlQifLgSSRxZxyI5r7Zk/pub")
+                        } label: {
                             Label(NSLocalizedString("terms_of_service", comment: ""), systemImage: "doc.text")
                         }
                     }
@@ -200,34 +187,12 @@ struct ProfileView: View {
             .sheet(isPresented: $showPaywall) {
                 SubscriptionPaywallView()
             }
+            .sheet(item: $webURL) { url in
+                WebBrowserView(title: url.host ?? "", url: url)
+            }
         }
     }
 
-    private var productIntroText: String = """
-    LumenOS is an all-in-one light and shadow tool.
-
-    - Intelligent Flashlight: Precision brightness control with SOS and Party modes.
-    - Creative Barrage: Custom LED effects with RGB glow and dynamic themes.
-    - Sync Feature: Synchronize your flashlight with your barrage rhythm.
-
-    Unlock PRO to enjoy unlimited features and exclusive themes.
-    """
-
-    private var privacyPolicyText: String = """
-    Your privacy is our priority.
-
-    1. No Collection: We do not collect any personal data or location information.
-    2. Permissions: Camera/Flashlight access is used only for lighting features.
-    3. Security: All processing is done locally on your device.
-    """
-
-    private var termsOfServiceText: String = """
-    By using LumenOS, you agree to these terms:
-
-    - License: Personal, non-commercial use only.
-    - Purchase: PRO features are available via a one-time payment.
-    - Responsibility: We are not liable for misuse of the flashlight features.
-    """
 }
 
 #Preview {

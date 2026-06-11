@@ -143,7 +143,11 @@ struct BarrageView: View {
 
                         // 3. Control Panel
                         VStack(spacing: 25) {
-                            ControlSection(title: NSLocalizedString("label_scroll_speed", comment: ""), icon: "speedometer") {
+                            // Speed Section
+                            VStack(alignment: .leading, spacing: 12) {
+                                Label(NSLocalizedString("label_scroll_speed", comment: ""), systemImage: "speedometer")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.6))
                                 HStack {
                                     Image(systemName: "tortoise.fill").foregroundColor(.gray)
                                     Slider(value: $speed, in: 1...10)
@@ -152,7 +156,11 @@ struct BarrageView: View {
                                 }
                             }
 
-                            ControlSection(title: NSLocalizedString("label_color_effect", comment: ""), icon: "paintbrush.fill") {
+                            // Color Effect Section
+                            VStack(alignment: .leading, spacing: 12) {
+                                Label(NSLocalizedString("label_color_effect", comment: ""), systemImage: "paintbrush.fill")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.6))
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 15) {
                                         Button(action: { isRGB = true }) {
@@ -186,11 +194,15 @@ struct BarrageView: View {
                                 ToggleCard(title: NSLocalizedString("label_torch_sync", comment: ""), isOn: $isTorchSync, icon: "flashlight.on.fill")
                             }
 
-                            ControlSection(title: NSLocalizedString("label_dynamic_bg", comment: ""), icon: "sparkles") {
+                            // Dynamic Background Section
+                            VStack(alignment: .leading, spacing: 12) {
+                                Label(NSLocalizedString("label_dynamic_bg", comment: ""), systemImage: "sparkles")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.6))
                                 HStack(spacing: 10) {
-                                    ForEach([BarrageBGType.black, .hearts, .stars, .aurora], id: \.self) { type in
+                                    ForEach(BarrageBGType.allCases) { type in
                                         Button(action: { bgType = type }) {
-                                            Text(NSLocalizedString("bg_type_" + type.rawValue.lowercased(), comment: ""))
+                                            Text(NSLocalizedString("bg_type_" + type.rawValue, comment: ""))
                                                 .font(.system(size: 13, weight: .medium))
                                                 .frame(maxWidth: .infinity)
                                                 .padding(.vertical, 12)
@@ -280,7 +292,6 @@ struct FullScreenBarrageView: View {
         }
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
-            // 确保退出时关闭同步灯光
             if isTorchSync {
                 FlashlightManager.shared.toggle(isOn: false)
             }
@@ -338,7 +349,7 @@ struct MarqueeCore: View {
     @StateObject private var manager = FlashlightManager.shared
 
     var body: some View {
-        TimelineView(.animation) { timelineContext in
+        TimelineView(.animation) { (timelineContext: TimelineViewDefaultContext) in
             let time = timelineContext.date.timeIntervalSinceReferenceDate
             let baseFontSize: CGFloat = isFullScreen ? 200 : 80
             let width = textWidth(text, size: baseFontSize)
@@ -368,11 +379,10 @@ struct MarqueeCore: View {
             }
             .fixedSize()
             .offset(x: xOffset, y: (containerSize.height - baseFontSize) / 2)
-            .onChange(of: timelineContext.date) { date in
+            .onChange(of: timelineContext.date) { _ in
                 if isTorchSync {
-                    // 使用优化后的同步接口，减少配置锁定开销
                     let strobe = Int(time * speed * 2) % 2 == 0
-                    manager.setTorchSync(isOn: strobe)
+                    manager.toggle(isOn: strobe)
                 }
             }
         }
@@ -421,7 +431,7 @@ struct BarrageBackgroundView: View {
 
 struct FallingHeartsAnimation: View {
     var body: some View {
-        TimelineView(.animation) { timelineContext in
+        TimelineView(.animation) { (timelineContext: TimelineViewDefaultContext) in
             let time = timelineContext.date.timeIntervalSinceReferenceDate
             Canvas { gc, size in
                 for i in 0..<15 {
@@ -437,7 +447,7 @@ struct FallingHeartsAnimation: View {
 
 struct TwinklingStarsAnimation: View {
     var body: some View {
-        TimelineView(.animation) { timelineContext in
+        TimelineView(.animation) { (timelineContext: TimelineViewDefaultContext) in
             let time = timelineContext.date.timeIntervalSinceReferenceDate
             Canvas { gc, size in
                 for i in 0..<50 {
@@ -453,7 +463,7 @@ struct TwinklingStarsAnimation: View {
 
 struct AuroraGradientAnimation: View {
     var body: some View {
-        TimelineView(.animation) { timelineContext in
+        TimelineView(.animation) { (timelineContext: TimelineViewDefaultContext) in
             LinearGradient(colors: [.blue.opacity(0.4), .green.opacity(0.4), .purple.opacity(0.4)], startPoint: .topLeading, endPoint: .bottomTrailing)
                 .hueRotation(.degrees(timelineContext.date.timeIntervalSinceReferenceDate * 40))
         }
@@ -462,32 +472,9 @@ struct AuroraGradientAnimation: View {
 
 // MARK: - Helper Components
 
-enum BarrageBGType: String {
-    case black = "black"
-    case hearts = "hearts"
-    case stars = "stars"
-    case aurora = "aurora"
-}
-
-struct ControlSection<Content: View>: View {
-    let title: String
-    let icon: String
-    let content: Content
-
-    init(title: String, icon: String, @ViewBuilder content: () -> Content) {
-        self.title = title
-        self.icon = icon
-        self.content = content()
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(title, systemImage: icon)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white.opacity(0.6))
-            content
-        }
-    }
+enum BarrageBGType: String, CaseIterable, Identifiable {
+    case black, hearts, stars, aurora
+    var id: String { self.rawValue }
 }
 
 struct ToggleCard: View {

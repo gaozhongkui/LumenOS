@@ -8,6 +8,7 @@ final class FlashlightManager: ObservableObject {
 
     private var device: AVCaptureDevice?
     private var strobeTimer: Timer?
+    private var sosIndex = 0
 
     @Published var currentMode: FlashlightMode = .standard
     @Published var intensity: Float = 0.6
@@ -16,44 +17,46 @@ final class FlashlightManager: ObservableObject {
         self.device = AVCaptureDevice.default(for: .video)
     }
 
-    enum FlashlightMode {
-        case standard, sos, strobe
+    enum FlashlightMode: String, CaseIterable {
+        case standard, sos, strobe, party, pulse, silent
     }
 
-    /// Toggle flashlight switch with full logic (stops timers)
-    func toggle(isOn: Bool, level: Float = 1.0) {
-        self.intensity = level
+    /// Toggle flashlight switch with full logic
+    func toggle(isOn: Bool, level: Float? = nil) {
+        if let level = level {
+            self.intensity = level
+        }
+
+        if !isOn {
+            stopStrobe()
+            return
+        }
+
+        // If already on and mode hasn't changed, we might not want to reset timers.
+        // But usually, updateMode calls this when a change IS detected.
+
+        restartCurrentMode()
+    }
+
+    func restartCurrentMode() {
         stopStrobe()
 
         guard let device = device, device.hasTorch else { return }
 
-        do {
-            try device.lockForConfiguration()
-            if isOn {
-                switch currentMode {
-                case .standard:
-                    try device.setTorchModeOn(level: max(0.001, min(intensity, 1.0)))
-                case .sos:
-                    device.unlockForConfiguration()
-                    startSOS()
-                    return
-                case .strobe:
-                    device.unlockForConfiguration()
-                    startStrobe()
-                    return
-                }
-            } else {
-                device.torchMode = .off
-            }
-            device.unlockForConfiguration()
-        } catch {
-            print("Flashlight configuration failed: \(error)")
+        switch currentMode {
+        case .standard:
+            setTorchInternal(isOn: true)
+        case .sos:
+            startSOS()
+        case .strobe:
+            startStrobe(interval: 0.1)
+        case .party:
+            startStrobe(interval: 0.05)
+        case .pulse:
+            startStrobe(interval: 0.4)
+        case .silent:
+            setTorchInternal(isOn: false) // Silent mode = off but "active"
         }
-    }
-
-    /// Lightweight torch control for sync features
-    func setTorchSync(isOn: Bool, level: Float = 0.3) {
-        setTorchInternal(isOn: isOn, level: level)
     }
 
     /// Adjust intensity immediately
@@ -68,9 +71,9 @@ final class FlashlightManager: ObservableObject {
 
     // MARK: - Strobe & SOS Logic
 
-    private func startStrobe() {
+    private func startStrobe(interval: TimeInterval) {
         var flashOn = false
-        strobeTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+        strobeTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             flashOn.toggle()
             self.setTorchInternal(isOn: flashOn)
@@ -78,23 +81,23 @@ final class FlashlightManager: ObservableObject {
     }
 
     private func startSOS() {
-        let sosPattern: [TimeInterval] = [0.2, 0.2, 0.2, 0.2, 0.2, 0.6, 0.6, 0.2, 0.6, 0.2, 0.6, 0.6, 0.2, 0.2, 0.2, 0.2, 0.2, 1.0]
-        var index = 0
-        strobeTimer = Timer()
-
-        func runSOSStep() {
-            guard strobeTimer != nil else { return }
-            let isOn = index % 2 == 0
-            self.setTorchInternal(isOn: isOn)
-            let delay = sosPattern[index % sosPattern.count]
-            index = (index + 1) % sosPattern.count
-
-            // Corrected: Capture the local function directly
-            strobeTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { _ in
-                runSOSStep()
-            }
-        }
+        sosIndex = 0
         runSOSStep()
+    }
+
+    private func runSOSStep() {
+        let sosPattern: [TimeInterval] = [0.2, 0.2, 0.2, 0.2, 0.2, 0.6, 0.6, 0.2, 0.6, 0.2, 0.6, 0.6, 0.2, 0.2, 0.2, 0.2, 0.2, 1.0]
+
+        let isOn = sosIndex % 2 == 0
+        self.setTorchInternal(isOn: isOn)
+
+        let delay = sosPattern[sosIndex % sosPattern.count]
+        sosIndex = (sosIndex + 1) % sosPattern.count
+
+        strobeTimer?.invalidate()
+        strobeTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+            self?.runSOSStep()
+        }
     }
 
     private func setTorchInternal(isOn: Bool, level: Float? = nil) {
@@ -102,7 +105,8 @@ final class FlashlightManager: ObservableObject {
         do {
             try device.lockForConfiguration()
             if isOn {
-                try device.setTorchModeOn(level: max(0.001, min(level ?? self.intensity, 1.0)))
+                let targetLevel = max(0.001, min(level ?? self.intensity, 1.0))
+                try device.setTorchModeOn(level: targetLevel)
             } else {
                 device.torchMode = .off
             }
