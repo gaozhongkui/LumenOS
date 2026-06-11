@@ -11,7 +11,7 @@ struct FlashlightView: View {
     @State private var rotation: Double = 0
     @State private var selectedColor: Color = .l_gold
     @State private var showPaywall = false
-    @State private var batteryLevel: Float = 0
+    @State private var batteryLevel: Float = -1
     @State private var batteryState: UIDevice.BatteryState = .unknown
     @State private var thermalState: ProcessInfo.ThermalState = .nominal
 
@@ -202,6 +202,7 @@ struct FlashlightView: View {
     }
 
     private var batteryIconName: String {
+        guard batteryLevel >= 0 else { return "battery.100" }  // 模拟器/未知状态
         if batteryState == .charging || batteryState == .full {
             return "battery.100.bolt"
         }
@@ -215,6 +216,7 @@ struct FlashlightView: View {
     }
 
     private var batteryColor: Color {
+        guard batteryLevel >= 0 else { return .white.opacity(0.6) }  // 模拟器/未知状态
         if batteryState == .charging || batteryState == .full { return .green }
         if batteryLevel <= 0.10 { return .red }
         if batteryLevel <= 0.25 { return .yellow }
